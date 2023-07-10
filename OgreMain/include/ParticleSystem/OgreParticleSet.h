@@ -1,7 +1,7 @@
 /*
 -----------------------------------------------------------------------------
 This source file is part of OGRE-Next
-    (Object-oriented Graphics Rendering Engine)
+(Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
 Copyright (c) 2000-2023 Torus Knot Software Ltd
@@ -26,31 +26,43 @@ THE SOFTWARE.
 -----------------------------------------------------------------------------
 */
 
-#include "OgreStableHeaders.h"
+#include "OgrePrerequisites.h"
 
-#include "Threading/OgreSemaphore.h"
+#include "OgreBillboardSet.h"
+#include "OgreMovableObject.h"
+#include "OgreRenderable.h"
+
+#include "OgreParticle2.h"
+
+#include "OgreHeaderPrefix.h"
 
 namespace Ogre
 {
-    Semaphore::Semaphore( uint32_t intialCount )
+    OGRE_ASSUME_NONNULL_BEGIN
+
+    class _OgreExport ParticleRenderable : Renderable
     {
-        mSemaphore = dispatch_semaphore_create( intialCount );
-    }
-    //-----------------------------------------------------------------------------------
-    Semaphore::~Semaphore() { mSemaphore = 0; }
-    //-----------------------------------------------------------------------------------
-    bool Semaphore::decrementOrWait()
+    };
+
+    struct ParticleRenderingBucket
     {
-        return dispatch_semaphore_wait( mSemaphore, DISPATCH_TIME_FOREVER ) == 0;
-    }
-    //-----------------------------------------------------------------------------------
-    bool Semaphore::increment() { return dispatch_semaphore_signal( mSemaphore ) == 0; }
-    //-----------------------------------------------------------------------------------
-    bool Semaphore::increment( uint32_t value )
+        HlmsDatablock    *datablock;
+        v1::BillboardType billboardType;
+    };
+
+    class _OgreExport ParticleSystem2 : MovableObject
     {
-        bool anyErrors = false;
-        while( value-- )
-            anyErrors |= dispatch_semaphore_signal( mSemaphore ) != 0;
-        return !anyErrors;
-    }
+        size_t mRenderingBucketIdx;
+        size_t mAffectorSetIdx;
+
+        FastArray<Particle2> particles;
+    };
+
+    class _OgreExport ParticleSet : MovableObject
+    {
+    };
+
+    OGRE_ASSUME_NONNULL_END
 }  // namespace Ogre
+
+#include "OgreHeaderSuffix.h"

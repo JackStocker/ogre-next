@@ -1,10 +1,10 @@
 /*
 -----------------------------------------------------------------------------
 This source file is part of OGRE-Next
-    (Object-oriented Graphics Rendering Engine)
-For the latest info, see http://www.ogre3d.org/
+(Object-oriented Graphics Rendering Engine)
+For the latest info, see http://www.ogre3d.org
 
-Copyright (c) 2000-2023 Torus Knot Software Ltd
+Copyright (c) 2000-2014 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -25,32 +25,40 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 -----------------------------------------------------------------------------
 */
+#ifndef OgreParticleFX2Plugin_H
+#define OgreParticleFX2Plugin_H
 
-#include "OgreStableHeaders.h"
-
-#include "Threading/OgreSemaphore.h"
+#include "OgrePlugin.h"
 
 namespace Ogre
 {
-    Semaphore::Semaphore( uint32_t intialCount )
+	class ParticleEmitterDefDataFactory;
+
+    /** Plugin instance for ParticleFX2 Manager */
+    class ParticleFX2Plugin final : public Plugin
     {
-        mSemaphore = dispatch_semaphore_create( intialCount );
-    }
-    //-----------------------------------------------------------------------------------
-    Semaphore::~Semaphore() { mSemaphore = 0; }
-    //-----------------------------------------------------------------------------------
-    bool Semaphore::decrementOrWait()
-    {
-        return dispatch_semaphore_wait( mSemaphore, DISPATCH_TIME_FOREVER ) == 0;
-    }
-    //-----------------------------------------------------------------------------------
-    bool Semaphore::increment() { return dispatch_semaphore_signal( mSemaphore ) == 0; }
-    //-----------------------------------------------------------------------------------
-    bool Semaphore::increment( uint32_t value )
-    {
-        bool anyErrors = false;
-        while( value-- )
-            anyErrors |= dispatch_semaphore_signal( mSemaphore ) != 0;
-        return !anyErrors;
-    }
+	protected:
+		FastArray<ParticleEmitterDefDataFactory *> mEmitterFactories;
+
+	public:
+        /// @copydoc Plugin::getName
+        const String &getName() const override;
+
+        /// @copydoc Plugin::install
+        void install( const NameValuePairList *options ) override;
+
+        /// @copydoc Plugin::initialise
+        void initialise() override;
+
+        /// @copydoc Plugin::shutdown
+        void shutdown() override;
+
+        /// @copydoc Plugin::uninstall
+        void uninstall() override;
+
+        /// @copydoc Plugin::getAbiCookie
+        void getAbiCookie( AbiCookie &outAbiCookie ) override;
+    };
 }  // namespace Ogre
+
+#endif

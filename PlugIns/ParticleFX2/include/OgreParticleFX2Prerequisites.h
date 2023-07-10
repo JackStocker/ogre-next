@@ -4,7 +4,7 @@ This source file is part of OGRE-Next
     (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2023 Torus Knot Software Ltd
+Copyright (c) 2000-2014 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -25,32 +25,46 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 -----------------------------------------------------------------------------
 */
+#ifndef OgreParticleFX2PluginPrerequisites_H
+#define OgreParticleFX2PluginPrerequisites_H
 
-#include "OgreStableHeaders.h"
+#include "OgrePrerequisites.h"
 
-#include "Threading/OgreSemaphore.h"
+//-----------------------------------------------------------------------
+// Windows Settings
+//-----------------------------------------------------------------------
+#if( OGRE_PLATFORM == OGRE_PLATFORM_WIN32 || OGRE_PLATFORM == OGRE_PLATFORM_WINRT ) && \
+    !defined( OGRE_STATIC_LIB )
+#    ifdef OGRE_PARTICLEFX2PLUGIN_EXPORTS
+#        define _OgreParticleFX2Export __declspec( dllexport )
+#    else
+#        if defined( __MINGW32__ )
+#            define _OgreParticleFX2Export
+#        else
+#            define _OgreParticleFX2Export __declspec( dllimport )
+#        endif
+#    endif
+#elif defined( OGRE_GCC_VISIBILITY )
+#    if !defined( OGRE_STATIC_LIB )
+#        define _OgreParticleFX2Export __attribute__( ( visibility( "default" ) ) )
+#    else
+#        define _OgreParticleFX2Export __attribute__( ( visibility( "hidden" ) ) )
+#    endif
+#else
+#    define _OgreParticleFX2Export
+#endif
 
 namespace Ogre
 {
-    Semaphore::Semaphore( uint32_t intialCount )
-    {
-        mSemaphore = dispatch_semaphore_create( intialCount );
-    }
-    //-----------------------------------------------------------------------------------
-    Semaphore::~Semaphore() { mSemaphore = 0; }
-    //-----------------------------------------------------------------------------------
-    bool Semaphore::decrementOrWait()
-    {
-        return dispatch_semaphore_wait( mSemaphore, DISPATCH_TIME_FOREVER ) == 0;
-    }
-    //-----------------------------------------------------------------------------------
-    bool Semaphore::increment() { return dispatch_semaphore_signal( mSemaphore ) == 0; }
-    //-----------------------------------------------------------------------------------
-    bool Semaphore::increment( uint32_t value )
-    {
-        bool anyErrors = false;
-        while( value-- )
-            anyErrors |= dispatch_semaphore_signal( mSemaphore ) != 0;
-        return !anyErrors;
-    }
+    // Predeclare classes
+    class PointEmitter;
+    class PointEmitterFactory;
+    class LinearForceAffector;
+    class LinearForceAffectorFactory;
+    class DirectionRandomiserAffectorFactory;
+    class DeflectorPlaneAffectorFactory;
+
+    struct ParticleCpuData;
 }  // namespace Ogre
+
+#endif

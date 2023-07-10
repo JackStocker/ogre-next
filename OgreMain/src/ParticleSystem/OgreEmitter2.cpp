@@ -1,7 +1,7 @@
 /*
 -----------------------------------------------------------------------------
 This source file is part of OGRE-Next
-    (Object-oriented Graphics Rendering Engine)
+(Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
 Copyright (c) 2000-2023 Torus Knot Software Ltd
@@ -26,31 +26,46 @@ THE SOFTWARE.
 -----------------------------------------------------------------------------
 */
 
-#include "OgreStableHeaders.h"
+#include "ParticleSystem/OgreEmitter2.h"
 
-#include "Threading/OgreSemaphore.h"
+#include "OgreException.h"
 
-namespace Ogre
+using namespace Ogre;
+
+EmitterDefData::EmitterDefData() : ParticleEmitter( nullptr )
 {
-    Semaphore::Semaphore( uint32_t intialCount )
+}
+//-----------------------------------------------------------------------------
+void EmitterInstanceData::setEnabled( bool bEnabled, const EmitterDefData &emitter )
+{
+    mEnabled = bEnabled;
+    if( bEnabled )
     {
-        mSemaphore = dispatch_semaphore_create( intialCount );
+        if( emitter.mDurationMin == emitter.mDurationMax )
+        {
+            mDurationRemain = emitter.mDurationMin;
+        }
+        else
+        {
+            mDurationRemain = Math::RangeRandom( emitter.mDurationMin, emitter.mDurationMax );
+        }
     }
-    //-----------------------------------------------------------------------------------
-    Semaphore::~Semaphore() { mSemaphore = 0; }
-    //-----------------------------------------------------------------------------------
-    bool Semaphore::decrementOrWait()
+    else
     {
-        return dispatch_semaphore_wait( mSemaphore, DISPATCH_TIME_FOREVER ) == 0;
+        // Reset repeat
+        if( emitter.mRepeatDelayMin == emitter.mRepeatDelayMax )
+        {
+            mRepeatDelayRemain = emitter.mRepeatDelayMin;
+        }
+        else
+        {
+            mRepeatDelayRemain = Math::RangeRandom( emitter.mRepeatDelayMax, emitter.mRepeatDelayMin );
+        }
     }
-    //-----------------------------------------------------------------------------------
-    bool Semaphore::increment() { return dispatch_semaphore_signal( mSemaphore ) == 0; }
-    //-----------------------------------------------------------------------------------
-    bool Semaphore::increment( uint32_t value )
-    {
-        bool anyErrors = false;
-        while( value-- )
-            anyErrors |= dispatch_semaphore_signal( mSemaphore ) != 0;
-        return !anyErrors;
-    }
-}  // namespace Ogre
+}
+//-----------------------------------------------------------------------------
+unsigned short EmitterDefData::_getEmissionCount( Real )
+{
+    OGRE_EXCEPT( Exception::ERR_INVALID_CALL, "", "" );
+    return 0u;
+}

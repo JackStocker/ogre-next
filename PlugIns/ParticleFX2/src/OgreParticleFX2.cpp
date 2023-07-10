@@ -4,7 +4,7 @@ This source file is part of OGRE-Next
     (Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
-Copyright (c) 2000-2023 Torus Knot Software Ltd
+Copyright (c) 2000-2014 Torus Knot Software Ltd
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -26,31 +26,31 @@ THE SOFTWARE.
 -----------------------------------------------------------------------------
 */
 
-#include "OgreStableHeaders.h"
+#include "OgreParticleFX2Prerequisites.h"
 
-#include "Threading/OgreSemaphore.h"
+#include "OgreParticleFX2Plugin.h"
+
+#include "OgreRoot.h"
+
+#ifndef OGRE_STATIC_LIB
 
 namespace Ogre
 {
-    Semaphore::Semaphore( uint32_t intialCount )
+    static ParticleFX2Plugin *plugin;
+    //-----------------------------------------------------------------------
+    extern "C" void _OgreParticleFX2Export
+    dllStartPlugin( const NameValuePairList *options ) noexcept( false )
     {
-        mSemaphore = dispatch_semaphore_create( intialCount );
+        plugin = OGRE_NEW ParticleFX2Plugin();
+        Root::getSingleton().installPlugin( plugin, options );
     }
-    //-----------------------------------------------------------------------------------
-    Semaphore::~Semaphore() { mSemaphore = 0; }
-    //-----------------------------------------------------------------------------------
-    bool Semaphore::decrementOrWait()
+    //-----------------------------------------------------------------------
+    extern "C" void _OgreParticleFX2Export dllStopPlugin( void )
     {
-        return dispatch_semaphore_wait( mSemaphore, DISPATCH_TIME_FOREVER ) == 0;
+        Root::getSingleton().uninstallPlugin( plugin );
+        OGRE_DELETE plugin;
     }
-    //-----------------------------------------------------------------------------------
-    bool Semaphore::increment() { return dispatch_semaphore_signal( mSemaphore ) == 0; }
-    //-----------------------------------------------------------------------------------
-    bool Semaphore::increment( uint32_t value )
-    {
-        bool anyErrors = false;
-        while( value-- )
-            anyErrors |= dispatch_semaphore_signal( mSemaphore ) != 0;
-        return !anyErrors;
-    }
+
 }  // namespace Ogre
+
+#endif

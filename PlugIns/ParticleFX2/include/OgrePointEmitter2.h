@@ -1,7 +1,7 @@
 /*
 -----------------------------------------------------------------------------
 This source file is part of OGRE-Next
-    (Object-oriented Graphics Rendering Engine)
+(Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
 Copyright (c) 2000-2023 Torus Knot Software Ltd
@@ -26,31 +26,34 @@ THE SOFTWARE.
 -----------------------------------------------------------------------------
 */
 
-#include "OgreStableHeaders.h"
+#include "OgreParticleFX2Prerequisites.h"
 
-#include "Threading/OgreSemaphore.h"
+#include "ParticleSystem/OgreEmitter2.h"
+
+#include "OgreHeaderPrefix.h"
 
 namespace Ogre
 {
-    Semaphore::Semaphore( uint32_t intialCount )
+	OGRE_ASSUME_NONNULL_BEGIN
+
+    class _OgreParticleFX2Export PointEmitter : public EmitterDefData
     {
-        mSemaphore = dispatch_semaphore_create( intialCount );
-    }
-    //-----------------------------------------------------------------------------------
-    Semaphore::~Semaphore() { mSemaphore = 0; }
-    //-----------------------------------------------------------------------------------
-    bool Semaphore::decrementOrWait()
-    {
-        return dispatch_semaphore_wait( mSemaphore, DISPATCH_TIME_FOREVER ) == 0;
-    }
-    //-----------------------------------------------------------------------------------
-    bool Semaphore::increment() { return dispatch_semaphore_signal( mSemaphore ) == 0; }
-    //-----------------------------------------------------------------------------------
-    bool Semaphore::increment( uint32_t value )
-    {
-        bool anyErrors = false;
-        while( value-- )
-            anyErrors |= dispatch_semaphore_signal( mSemaphore ) != 0;
-        return !anyErrors;
-    }
+    public:
+        uint32 genEmissionCount( Real timeSinceLast, EmitterInstanceData &instanceData ) const override;
+
+        void initEmittedParticles( ParticleCpuData cpuData, const uint32 *newHandles,
+                                   size_t numParticles ) override;
+    };
+
+	class _OgrePrivate PointEmitterFactory final : public ParticleEmitterDefDataFactory
+	{
+	public:
+		virtual const String &getName() const override;
+
+		EmitterDefData *createEmitter() override;
+	};
+
+	OGRE_ASSUME_NONNULL_END
 }  // namespace Ogre
+
+#include "OgreHeaderSuffix.h"

@@ -1,7 +1,7 @@
 /*
 -----------------------------------------------------------------------------
 This source file is part of OGRE-Next
-    (Object-oriented Graphics Rendering Engine)
+(Object-oriented Graphics Rendering Engine)
 For the latest info, see http://www.ogre3d.org/
 
 Copyright (c) 2000-2023 Torus Knot Software Ltd
@@ -26,31 +26,26 @@ THE SOFTWARE.
 -----------------------------------------------------------------------------
 */
 
-#include "OgreStableHeaders.h"
+#include "OgrePrerequisites.h"
 
-#include "Threading/OgreSemaphore.h"
+#include "ParticleSystem/OgreParticle2.h"
+
+#include "OgreHeaderPrefix.h"
 
 namespace Ogre
 {
-    Semaphore::Semaphore( uint32_t intialCount )
+    OGRE_ASSUME_NONNULL_BEGIN
+
+    /// Affectors are per ParticleSystemDef
+    class _OgreExport Affector
     {
-        mSemaphore = dispatch_semaphore_create( intialCount );
-    }
-    //-----------------------------------------------------------------------------------
-    Semaphore::~Semaphore() { mSemaphore = 0; }
-    //-----------------------------------------------------------------------------------
-    bool Semaphore::decrementOrWait()
-    {
-        return dispatch_semaphore_wait( mSemaphore, DISPATCH_TIME_FOREVER ) == 0;
-    }
-    //-----------------------------------------------------------------------------------
-    bool Semaphore::increment() { return dispatch_semaphore_signal( mSemaphore ) == 0; }
-    //-----------------------------------------------------------------------------------
-    bool Semaphore::increment( uint32_t value )
-    {
-        bool anyErrors = false;
-        while( value-- )
-            anyErrors |= dispatch_semaphore_signal( mSemaphore ) != 0;
-        return !anyErrors;
-    }
+    public:
+        virtual ~Affector() = default;
+
+        virtual void run( ParticleCpuData cpuData, const size_t numParticles ) const = 0;
+    };
+
+    OGRE_ASSUME_NONNULL_END
 }  // namespace Ogre
+
+#include "OgreHeaderSuffix.h"
