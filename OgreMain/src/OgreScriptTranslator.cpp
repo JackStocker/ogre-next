@@ -6290,8 +6290,8 @@ namespace Ogre{
 
         if( !processed )
         {
-            ParticleSystemManager2 *particleSystemManager = 0;
-            mSystem = particleSystemManager->createParticleSystemDef( obj->name );
+            mSystem =
+                Root::getSingleton().getParticleSystemManager2()->createParticleSystemDef( obj->name );
         }
 
         if( !mSystem )
