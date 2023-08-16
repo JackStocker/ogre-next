@@ -1689,6 +1689,19 @@ namespace Ogre
         }
     }
     //-----------------------------------------------------------------------
+    void SceneManager::_fireParticleSystemManager2Update()
+    {
+        mRequestType = PARTICLE_SYSTEM_MANAGER2;
+
+        if( mForceMainThread )
+            updateWorkerThreadImpl( 0 );
+        else
+        {
+            mWorkerThreadsBarrier->sync();  // Fire threads
+            mWorkerThreadsBarrier->sync();  // Wait them to complete
+        }
+    }
+    //-----------------------------------------------------------------------
     void SceneManager::_frameEnded() { mRenderQueue->frameEnded(); }
     //-----------------------------------------------------------------------
     void SceneManager::_setDestinationRenderSystem( RenderSystem *sys )
@@ -4672,6 +4685,9 @@ namespace Ogre
             break;
         case PARALLEL_HLMS_COMPILE:
             mRenderQueue->_compileShadersThread( threadIdx );
+            break;
+        case PARTICLE_SYSTEM_MANAGER2:
+            mParticleSystemManager2->_updateParallel( threadIdx, mNumWorkerThreads );
             break;
         case USER_UNIFORM_SCALABLE_TASK:
             mUserTask->execute( threadIdx, mNumWorkerThreads );
