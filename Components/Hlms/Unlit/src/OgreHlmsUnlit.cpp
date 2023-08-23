@@ -565,6 +565,8 @@ namespace Ogre
     //-----------------------------------------------------------------------------------
     void HlmsUnlit::notifyPropertiesMergedPreGenerationStep( const size_t tid )
     {
+        Hlms::notifyPropertiesMergedPreGenerationStep( tid );
+
         const int32 samplerStateStart = getProperty( tid, UnlitProperty::SamplerStateStart );
         int32 texUnit = samplerStateStart;
         {
@@ -668,6 +670,12 @@ namespace Ogre
             int32 numClipDist = std::max( getProperty( kNoTid, HlmsBaseProp::PsoClipDistances ), 1 );
             setProperty( kNoTid, HlmsBaseProp::PsoClipDistances, numClipDist );
             setProperty( kNoTid, HlmsBaseProp::GlobalClipPlanes, 1 );
+        }
+
+        if( pass && pass->getAnyTargetTexture() )
+        {
+            setProperty( kNoTid, HlmsBaseProp::MsaaSamples,
+                         pass->getAnyTargetTexture()->getSampleDescription().getColourSamples() );
         }
 
         mListener->preparePassHash( shadowNode, casterPass, dualParaboloid, sceneManager, this );
