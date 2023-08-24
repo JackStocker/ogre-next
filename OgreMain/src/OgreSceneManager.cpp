@@ -2192,7 +2192,8 @@ namespace Ogre
                     request.addToRenderQueue )
                 {
                     mParticleSystemManager2->_addToRenderQueue( threadIdx, mNumWorkerThreads,
-                                                                mRenderQueue, currRqId, visibilityMask );
+                                                                mRenderQueue, currRqId, visibilityMask,
+                                                                !request.casterPass );
                 }
             }
 
