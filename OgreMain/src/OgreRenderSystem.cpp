@@ -68,9 +68,6 @@ namespace Ogre {
         , mDebugShaders(false)
 #endif
         , mWBuffer(false)
-        , mBatchCount(0)
-        , mFaceCount(0)
-        , mVertexCount(0)
         , mInvertVertexWinding(false)
         , mDisabledTexUnitsFrom(0)
         , mCurrentPassIterationCount(0)
@@ -136,7 +133,7 @@ namespace Ogre {
         // Subclasses should take it from here
         // They should ALL call this superclass method from
         //   their own initialise() implementations.
-        
+
         mVertexProgramBound = false;
         mGeometryProgramBound = false;
         mFragmentProgramBound = false;
@@ -152,7 +149,7 @@ namespace Ogre {
     {
     if (mRealCapabilities != 0)
     {
-      OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, 
+      OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR,
           "Custom render capabilities must be set before the RenderSystem is initialised.",
           "RenderSystem::useCustomRenderSystemCapabilities");
     }
@@ -162,7 +159,7 @@ namespace Ogre {
     }
 
     //---------------------------------------------------------------------------------------------
-    bool RenderSystem::_createRenderWindows(const RenderWindowDescriptionList& renderWindowDescriptions, 
+    bool RenderSystem::_createRenderWindows(const RenderWindowDescriptionList& renderWindowDescriptions,
         RenderWindowList& createdWindows)
     {
         unsigned int fullscreenWindowsCount = 0;
@@ -173,8 +170,8 @@ namespace Ogre {
             const RenderWindowDescription* curDesc = &renderWindowDescriptions[nWindow];
 
             // Count full screen windows.
-            if (curDesc->useFullScreen)         
-                fullscreenWindowsCount++;   
+            if (curDesc->useFullScreen)
+                fullscreenWindowsCount++;
 
             bool renderWindowFound = false;
 
@@ -188,11 +185,11 @@ namespace Ogre {
                     {
                         renderWindowFound = true;
                         break;
-                    }                   
+                    }
                 }
             }
 
-            // Make sure we don't already have a render target of the 
+            // Make sure we don't already have a render target of the
             // same name as the one supplied
             if(renderWindowFound)
             {
@@ -203,17 +200,17 @@ namespace Ogre {
                 OGRE_EXCEPT( Exception::ERR_INTERNAL_ERROR, msg, "RenderSystem::createRenderWindow" );
             }
         }
-        
+
         // Case we have to create some full screen rendering windows.
         if (fullscreenWindowsCount > 0)
         {
             // Can not mix full screen and windowed rendering windows.
             if (fullscreenWindowsCount != renderWindowDescriptions.size())
             {
-                OGRE_EXCEPT(Exception::ERR_INVALIDPARAMS, 
+                OGRE_EXCEPT(Exception::ERR_INVALIDPARAMS,
                     "Can not create mix of full screen and windowed rendering windows",
                     "RenderSystem::createRenderWindows");
-            }                   
+            }
         }
 
         return true;
@@ -314,7 +311,7 @@ namespace Ogre {
 
         const TexturePtr& tex = tl._getTexturePtr();
         bool isValidBinding = false;
-        
+
         if (mCurrentCapabilities->hasCapability(RSC_COMPLETE_TEXTURE_BINDING))
             _setBindingType(tl.getBindingType());
 
@@ -450,7 +447,7 @@ namespace Ogre {
             case TextureUnitState::ET_TRANSFORM:
                 break;
             case TextureUnitState::ET_PROJECTIVE_TEXTURE:
-                _setTextureCoordCalculation(texUnit, TEXCALC_PROJECTIVE_TEXTURE, 
+                _setTextureCoordCalculation(texUnit, TEXCALC_PROJECTIVE_TEXTURE,
                     effi->second.frustum);
                 anyCalcs = true;
                 break;
@@ -462,13 +459,13 @@ namespace Ogre {
             _setTextureCoordCalculation(texUnit, TEXCALC_NONE);
         }
 
-        // Change tetxure matrix 
+        // Change tetxure matrix
         _setTextureMatrix(texUnit, tl.getTextureTransform());
 
 
     }
     //-----------------------------------------------------------------------
-    void RenderSystem::_setTexture(size_t unit, bool enabled, 
+    void RenderSystem::_setTexture(size_t unit, bool enabled,
         const String &texname)
     {
         TexturePtr t = TextureManager::getSingleton().getByName(texname);
@@ -477,44 +474,44 @@ namespace Ogre {
     //-----------------------------------------------------------------------
     void RenderSystem::_setBindingType(TextureUnitState::BindingType bindingType)
     {
-        OGRE_EXCEPT(Exception::ERR_NOT_IMPLEMENTED, 
-            "This rendersystem does not support binding texture to other shaders then fragment", 
+        OGRE_EXCEPT(Exception::ERR_NOT_IMPLEMENTED,
+            "This rendersystem does not support binding texture to other shaders then fragment",
             "RenderSystem::_setBindingType");
     }
     //-----------------------------------------------------------------------
     void RenderSystem::_setVertexTexture(size_t unit, const TexturePtr& tex)
     {
-        OGRE_EXCEPT(Exception::ERR_NOT_IMPLEMENTED, 
+        OGRE_EXCEPT(Exception::ERR_NOT_IMPLEMENTED,
             "This rendersystem does not support separate vertex texture samplers, "
             "you should use the regular texture samplers which are shared between "
-            "the vertex and fragment units.", 
+            "the vertex and fragment units.",
             "RenderSystem::_setVertexTexture");
     }
     //-----------------------------------------------------------------------
     void RenderSystem::_setGeometryTexture(size_t unit, const TexturePtr& tex)
     {
-        OGRE_EXCEPT(Exception::ERR_NOT_IMPLEMENTED, 
+        OGRE_EXCEPT(Exception::ERR_NOT_IMPLEMENTED,
             "This rendersystem does not support separate geometry texture samplers, "
             "you should use the regular texture samplers which are shared between "
-            "the vertex and fragment units.", 
+            "the vertex and fragment units.",
             "RenderSystem::_setGeometryTexture");
     }
     //-----------------------------------------------------------------------
     void RenderSystem::_setTessellationHullTexture(size_t unit, const TexturePtr& tex)
     {
-        OGRE_EXCEPT(Exception::ERR_NOT_IMPLEMENTED, 
+        OGRE_EXCEPT(Exception::ERR_NOT_IMPLEMENTED,
             "This rendersystem does not support separate tessellation hull texture samplers, "
             "you should use the regular texture samplers which are shared between "
-            "the vertex and fragment units.", 
+            "the vertex and fragment units.",
             "RenderSystem::_setTessellationHullTexture");
     }
     //-----------------------------------------------------------------------
     void RenderSystem::_setTessellationDomainTexture(size_t unit, const TexturePtr& tex)
     {
-        OGRE_EXCEPT(Exception::ERR_NOT_IMPLEMENTED, 
+        OGRE_EXCEPT(Exception::ERR_NOT_IMPLEMENTED,
             "This rendersystem does not support separate tessellation domain texture samplers, "
             "you should use the regular texture samplers which are shared between "
-            "the vertex and fragment units.", 
+            "the vertex and fragment units.",
             "RenderSystem::_setTessellationDomainTexture");
     }
     //-----------------------------------------------------------------------
@@ -728,25 +725,33 @@ namespace Ogre {
         mRenderTargets.clear();
     }
     //-----------------------------------------------------------------------
-    void RenderSystem::_beginGeometryCount(void)
+    void RenderSystem::_resetMetrics()
     {
-        mBatchCount = mFaceCount = mVertexCount = 0;
-
+        const bool oldValue = mMetrics.mIsRecordingMetrics;
+        mMetrics = Metrics();
+        mMetrics.mIsRecordingMetrics = oldValue;
     }
     //-----------------------------------------------------------------------
-    unsigned int RenderSystem::_getFaceCount(void) const
+    void RenderSystem::_addMetrics( const Metrics &newMetrics )
     {
-        return static_cast< unsigned int >( mFaceCount );
+        if( mMetrics.mIsRecordingMetrics )
+        {
+            mMetrics.mBatchCount += newMetrics.mBatchCount;
+            mMetrics.mFaceCount += newMetrics.mFaceCount;
+            mMetrics.mVertexCount += newMetrics.mVertexCount;
+            mMetrics.mDrawCount += newMetrics.mDrawCount;
+            mMetrics.mInstanceCount += newMetrics.mInstanceCount;
+        }
     }
     //-----------------------------------------------------------------------
-    unsigned int RenderSystem::_getBatchCount(void) const
+    void RenderSystem::setMetricsRecordingEnabled( bool bEnable )
     {
-        return static_cast< unsigned int >( mBatchCount );
+        mMetrics.mIsRecordingMetrics = bEnable;
     }
     //-----------------------------------------------------------------------
-    unsigned int RenderSystem::_getVertexCount(void) const
+    const RenderSystem::Metrics& RenderSystem::getMetrics() const
     {
-        return static_cast< unsigned int >( mVertexCount );
+        return mMetrics;
     }
     //-----------------------------------------------------------------------
     void RenderSystem::convertColourValue(const ColourValue& colour, uint32* pDest)
@@ -800,11 +805,11 @@ namespace Ogre {
         switch(op.operationType)
         {
         case OT_TRIANGLE_LIST:
-            mFaceCount += (val / 3);
+            mMetrics.mFaceCount += (val / 3u);
             break;
         case OT_TRIANGLE_STRIP:
         case OT_TRIANGLE_FAN:
-            mFaceCount += (val - 2);
+            mMetrics.mFaceCount += (val - 2u);
             break;
         case OT_POINT_LIST:
         case OT_LINE_LIST:
@@ -844,8 +849,8 @@ namespace Ogre {
             break;
         }
 
-        mVertexCount += op.vertexData->vertexCount * trueInstanceNum;
-        mBatchCount += mCurrentPassIterationCount;
+        mMetrics.mVertexCount += op.vertexData->vertexCount * trueInstanceNum;
+        mMetrics.mBatchCount += mCurrentPassIterationCount;
 
         // sort out clip planes
         // have to do it here in case of matrix issues
@@ -866,10 +871,10 @@ namespace Ogre {
     //-----------------------------------------------------------------------
     void RenderSystem::_renderUsingReadBackAsTexture(unsigned int secondPass,Ogre::String variableName,unsigned int StartSlot)
     {
-        OGRE_EXCEPT(Exception::ERR_NOT_IMPLEMENTED, 
+        OGRE_EXCEPT(Exception::ERR_NOT_IMPLEMENTED,
             "This rendersystem does not support reading back the inactive depth/stencil \
             buffer as a texture. Only DirectX 11 Render System supports it.",
-            "RenderSystem::_renderUsingReadBackAsTexture"); 
+            "RenderSystem::_renderUsingReadBackAsTexture");
     }
     //-----------------------------------------------------------------------
     void RenderSystem::setInvertVertexWinding(bool invert)
@@ -975,7 +980,7 @@ namespace Ogre {
     //-----------------------------------------------------------------------
     void RenderSystem::fireEvent(const String& name, const NameValuePairList* params)
     {
-        for(ListenerList::iterator i = mEventListeners.begin(); 
+        for(ListenerList::iterator i = mEventListeners.begin();
             i != mEventListeners.end(); ++i)
         {
             (*i)->eventOccurred(name, params);
@@ -1051,10 +1056,10 @@ namespace Ogre {
     //---------------------------------------------------------------------
     const String& RenderSystem::_getDefaultViewportMaterialScheme( void ) const
     {
-#ifdef RTSHADER_SYSTEM_BUILD_CORE_SHADERS   
+#ifdef RTSHADER_SYSTEM_BUILD_CORE_SHADERS
         if ( !(getCapabilities()->hasCapability(Ogre::RSC_FIXED_FUNCTION)) )
         {
-            // I am returning the exact value for now - I don't want to add dependency for the RTSS just for one string  
+            // I am returning the exact value for now - I don't want to add dependency for the RTSS just for one string
             static const String ShaderGeneratorDefaultScheme = "ShaderGeneratorDefaultScheme";
             return ShaderGeneratorDefaultScheme;
         }
@@ -1074,7 +1079,7 @@ namespace Ogre {
     {
         if ( !val.isNull() && !val->getIsInstanceData() )
         {
-            OGRE_EXCEPT(Exception::ERR_INVALIDPARAMS, 
+            OGRE_EXCEPT(Exception::ERR_INVALIDPARAMS,
                         "A none instance data vertex buffer was set to be the global instance vertex buffer.",
                         "RenderSystem::setGlobalInstanceVertexBuffer");
         }
@@ -1110,5 +1115,15 @@ namespace Ogre {
     {
         mDebugShaders = bDebugShaders;
     }
+
+    RenderSystem::Metrics::Metrics() :
+            mIsRecordingMetrics( false ),
+            mBatchCount( 0 ),
+            mFaceCount( 0 ),
+            mVertexCount( 0 ),
+            mDrawCount( 0 ),
+            mInstanceCount( 0 )
+        {
+        }
 }
 

@@ -432,11 +432,11 @@ namespace Ogre
                                                                     v1::CbStartV1LegacyRendering();
                     mLastVaoName = 0;
                 }
-                renderGL3V1( casterPass, dualParaboloid, passCache, mRenderQueues[i] );
+                renderGL3V1( rs, casterPass, dualParaboloid, passCache, mRenderQueues[i] );
             }
             else if( numNeededDraws > 0 /*&& mRenderQueues[i].mMode == FAST*/ )
             {
-                indirectDraw = renderGL3( casterPass, dualParaboloid, passCache, mRenderQueues[i],
+                indirectDraw = renderGL3( rs, casterPass, dualParaboloid, passCache, mRenderQueues[i],
                                           indirectBuffer, indirectDraw, startIndirectDraw );
             }
         }
@@ -532,7 +532,7 @@ namespace Ogre
         mLastTextureHash    = lastTextureHash;
     }
     //-----------------------------------------------------------------------
-    unsigned char* RenderQueue::renderGL3( bool casterPass, bool dualParaboloid, HlmsCache passCache[],
+    unsigned char* RenderQueue::renderGL3( RenderSystem *rs, bool casterPass, bool dualParaboloid, HlmsCache passCache[],
                                            const RenderQueueGroup &renderQueueGroup,
                                            IndirectBufferPacked *indirectBuffer,
                                            unsigned char *indirectDraw,
@@ -553,6 +553,8 @@ namespace Ogre
 
         CbDrawCall *drawCmd = 0;
         CbSharedDraw    *drawCountPtr = 0;
+
+        RenderSystem::Metrics stats;
 
         const QueuedRenderableArray &queuedRenderables = renderQueueGroup.mQueuedRenderables;
 
@@ -620,6 +622,7 @@ namespace Ogre
                 }
 
                 lastVao = 0;
+                stats.mDrawCount += 1u;
             }
 
             if( lastVao != vao )
@@ -658,16 +661,26 @@ namespace Ogre
                 }
 
                 lastVao = vao;
+                stats.mInstanceCount += 1;
             }
             else
             {
                 //Same mesh. Just go with instancing. Keep the counter in
                 //an external variable, as the region can be write-combined
                 drawCountPtr->instanceCount = ++instanceCount;
+                stats.mInstanceCount += 1;
             }
+
+            const Ogre::OperationType type = vao->getOperationType();
+            if( type == OT_TRIANGLE_STRIP || type == OT_TRIANGLE_LIST )
+                stats.mFaceCount += ( vao->mPrimCount / 3u ) * 1;
+
+            stats.mVertexCount += vao->mPrimCount * 1;
 
             ++itor;
         }
+
+        rs->_addMetrics( stats );
 
         mLastVaoName        = lastVaoName;
         mLastVertexData     = 0;
@@ -677,7 +690,7 @@ namespace Ogre
         return indirectDraw;
     }
     //-----------------------------------------------------------------------
-    void RenderQueue::renderGL3V1( bool casterPass, bool dualParaboloid,
+    void RenderQueue::renderGL3V1( RenderSystem *rs, bool casterPass, bool dualParaboloid,
                                    HlmsCache passCache[],
                                    const RenderQueueGroup &renderQueueGroup )
     {
@@ -690,6 +703,8 @@ namespace Ogre
         uint32 instanceCount = 1;
 
         v1::CbDrawCall *drawCmd = 0;
+
+        RenderSystem::Metrics stats;
 
         const QueuedRenderableArray &queuedRenderables = renderQueueGroup.mQueuedRenderables;
 
@@ -779,16 +794,31 @@ namespace Ogre
 
                     drawCmd = drawCall;
                 }
+
+                stats.mDrawCount += 1u;
+                stats.mInstanceCount += renderOp.numberOfInstances;
             }
             else
             {
                 //Same mesh. Just go with instancing. Keep the counter in
                 //an external variable, as the region can be write-combined
                 drawCmd->instanceCount = ++instanceCount;
+                stats.mInstanceCount += 1;
             }
+
+            if( renderOp.operationType == OT_TRIANGLE_STRIP ||
+                renderOp.operationType == OT_TRIANGLE_LIST )
+            {
+                stats.mFaceCount += ( renderOp.vertexData->vertexCount / 3u ) * 1;
+            }
+
+            stats.mVertexCount += renderOp.vertexData->vertexCount * 1;
+
 
             ++itor;
         }
+
+        rs->_addMetrics( stats );
 
         mLastVaoName        = 0;
         mLastVertexData     = 0;
@@ -853,7 +883,7 @@ namespace Ogre
         mFreeIndirectBuffers.insert( mFreeIndirectBuffers.end(),
                                      mUsedIndirectBuffers.begin(),
                                      mUsedIndirectBuffers.end() );
-        mUsedIndirectBuffers.clear();        
+        mUsedIndirectBuffers.clear();
     }
     //-----------------------------------------------------------------------
     void RenderQueue::setRenderQueueMode( uint8 rqId, Modes newMode )

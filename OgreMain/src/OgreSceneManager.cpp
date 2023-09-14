@@ -141,8 +141,8 @@ mIlluminationStage(IRS_NONE),
 mLightClippingInfoMapFrameNumber(999),
 mDefaultShadowFarDist(200),
 mDefaultShadowFarDistSquared(200*200),
-mShadowTextureOffset(0.6), 
-mShadowTextureFadeStart(0.7), 
+mShadowTextureOffset(0.6),
+mShadowTextureFadeStart(0.7),
 mShadowTextureFadeEnd(0.9),
 mShadowTextureCustomCasterPass(0),
 mCompositorTarget( IdString(), 0 ),
@@ -305,7 +305,7 @@ Camera* SceneManager::createCamera( const String &name, bool isVisible, bool for
 {
     if( mCamerasByName.find( name ) != mCamerasByName.end() )
     {
-        OGRE_EXCEPT( Exception::ERR_DUPLICATE_ITEM, 
+        OGRE_EXCEPT( Exception::ERR_DUPLICATE_ITEM,
                      "Camera with name '" + name + "' already exists", "SceneManager::createCamera" );
     }
 
@@ -383,7 +383,7 @@ void SceneManager::destroyCamera(Camera *cam)
     CameraMap::iterator itorMap = mCamerasByName.find( camName );
     if( itorMap == mCamerasByName.end() )
     {
-        OGRE_EXCEPT( Exception::ERR_ITEM_NOT_FOUND, 
+        OGRE_EXCEPT( Exception::ERR_ITEM_NOT_FOUND,
                      "Camera with name '" + camName.getFriendlyText() + "' not found!",
                      "SceneManager::destroyCamera" );
     }
@@ -697,7 +697,7 @@ ParticleSystem* SceneManager::createParticleSystem(const String& templateName)
 {
     NameValuePairList params;
     params["templateName"] = templateName;
-    
+
     return static_cast<ParticleSystem*>( createMovableObject(ParticleSystemFactory::FACTORY_TYPE_NAME,
                                                              &mEntityMemoryManager[SCENE_DYNAMIC],
                                                              &params) );
@@ -708,7 +708,7 @@ ParticleSystem* SceneManager::createParticleSystem( size_t quota, const String& 
     NameValuePairList params;
     params["quota"] = StringConverter::toString(quota);
     params["resourceGroup"] = group;
-    
+
     return static_cast<ParticleSystem*>( createMovableObject(ParticleSystemFactory::FACTORY_TYPE_NAME,
                                                              &mEntityMemoryManager[SCENE_DYNAMIC],
                                                              &params) );
@@ -751,13 +751,13 @@ void SceneManager::clearScene( bool deleteIndestructibleToo, bool reattachCamera
     }
     mSceneNodes.clear();
     mAutoTrackingSceneNodes.clear();
-    
+
     // Clear animations
     destroyAllAnimations();
 
     // Remove sky nodes since they've been deleted
     mSkyBoxNode = mSkyPlaneNode = mSkyDomeNode = 0;
-    mSkyBoxEnabled = mSkyPlaneEnabled = mSkyDomeEnabled = false; 
+    mSkyBoxEnabled = mSkyPlaneEnabled = mSkyDomeEnabled = false;
 
     if (mRenderQueue)
         mRenderQueue->clear();
@@ -796,7 +796,7 @@ SceneNode* SceneManager::createSceneNodeImpl( SceneNode *parent, NodeMemoryManag
 {
     SceneNode *retVal = OGRE_NEW SceneNode( Id::generateNewId<Node>(), this,
                                             nodeMemoryManager, parent );
-	if( nodeMemoryManager->getMemoryManagerType() == SCENE_STATIC )
+        if( nodeMemoryManager->getMemoryManagerType() == SCENE_STATIC )
         notifyStaticDirty( retVal );
     return retVal;
 }
@@ -850,25 +850,25 @@ void SceneManager::destroySceneNode( SceneNode* sn )
             "created with this SceneManager)", "SceneManager::destroySceneNode");
     }
 
-	{
-		// For any scene nodes which are tracking this node
-		// (or if this node is a tracker), remove its entry.
-		AutoTrackingSceneNodeVec::iterator itor = mAutoTrackingSceneNodes.begin();
-		AutoTrackingSceneNodeVec::iterator end  = mAutoTrackingSceneNodes.end();
+        {
+                // For any scene nodes which are tracking this node
+                // (or if this node is a tracker), remove its entry.
+                AutoTrackingSceneNodeVec::iterator itor = mAutoTrackingSceneNodes.begin();
+                AutoTrackingSceneNodeVec::iterator end  = mAutoTrackingSceneNodes.end();
 
-		while( itor != end )
-		{
-			if( itor->source == sn || itor->target == sn )
-			{
-				itor = efficientVectorRemove( mAutoTrackingSceneNodes, itor );
-				end  = mAutoTrackingSceneNodes.end();
-			}
-			else
-			{
-				++itor;
-			}
-		}
-	}
+                while( itor != end )
+                {
+                        if( itor->source == sn || itor->target == sn )
+                        {
+                                itor = efficientVectorRemove( mAutoTrackingSceneNodes, itor );
+                                end  = mAutoTrackingSceneNodes.end();
+                        }
+                        else
+                        {
+                                ++itor;
+                        }
+                }
+        }
 
     SceneNodeList::iterator itor = mSceneNodes.begin() + sn->mGlobalIndex;
 
@@ -1022,7 +1022,7 @@ void SceneManager::prepareRenderQueue(void)
     // Prep the ordering options
 
     // If we're using a custom render squence, define based on that
-    RenderQueueInvocationSequence* seq = 
+    RenderQueueInvocationSequence* seq =
         mCurrentViewport->_getRenderQueueInvocationSequence();
     if (seq)
     {
@@ -1031,7 +1031,7 @@ void SceneManager::prepareRenderQueue(void)
         while (invokeIt.hasMoreElements())
         {
             RenderQueueInvocation* invocation = invokeIt.getNext();
-            RenderQueueGroup* group = 
+            RenderQueueGroup* group =
                 q->getQueueGroup(invocation->getRenderQueueGroupID());
             group->resetOrganisationModes();
         }
@@ -1040,7 +1040,7 @@ void SceneManager::prepareRenderQueue(void)
         while (invokeIt.hasMoreElements())
         {
             RenderQueueInvocation* invocation = invokeIt.getNext();
-            RenderQueueGroup* group = 
+            RenderQueueGroup* group =
                 q->getQueueGroup(invocation->getRenderQueueGroupID());
             group->addOrganisationMode(invocation->getSolidsOrganisation());
         }
@@ -1051,8 +1051,8 @@ void SceneManager::prepareRenderQueue(void)
     {
         if (mLastRenderQueueInvocationCustom)
         {
-            // We need this here to reset if coming out of a render queue sequence, 
-            // but doing it resets any specialised settings set globally per render queue 
+            // We need this here to reset if coming out of a render queue sequence,
+            // but doing it resets any specialised settings set globally per render queue
             // so only do it when necessary - it's nice to allow people to set the organisation
             // mode manually for example
 
@@ -1192,7 +1192,7 @@ void SceneManager::_renderPhase02(Camera* camera, const Camera *lodCamera, Viewp
         if (mDestRenderSystem->getCapabilities()->hasCapability(RSC_USER_CLIP_PLANES))
         {
             mDestRenderSystem->resetClipPlanes();
-            if (camera->isWindowSet())  
+            if (camera->isWindowSet())
             {
                 mDestRenderSystem->setClipPlanes(camera->getWindowPlanes());
             }
@@ -1277,13 +1277,13 @@ void SceneManager::_renderPhase02(Camera* camera, const Camera *lodCamera, Viewp
         }
     } // end lock on scene graph mutex
 
-    mDestRenderSystem->_beginGeometryCount();
+    mDestRenderSystem->_resetMetrics();
 
     // Set initial camera state
     mDestRenderSystem->_setProjectionMatrix(mCameraInProgress->getProjectionMatrixRS());
-    
+
     mCachedViewMatrix = mCameraInProgress->getViewMatrix(true);
-    
+
     setViewMatrix(mCachedViewMatrix);
 
     // Render scene content
@@ -1300,10 +1300,18 @@ void SceneManager::_renderPhase02(Camera* camera, const Camera *lodCamera, Viewp
     mDestRenderSystem->setInvertVertexWinding(false);
 
     // Notify camera of vis faces
-    camera->_notifyRenderedFaces(mDestRenderSystem->_getFaceCount());
+    camera->_notifyRenderedFaces( mDestRenderSystem->getMetrics().mFaceCount );
 
     // Notify camera of vis batches
-    camera->_notifyRenderedBatches(mDestRenderSystem->_getBatchCount());
+    camera->_notifyRenderedBatches( mDestRenderSystem->getMetrics().mBatchCount );
+
+    //////////////////////////////////////////
+    // Custom Champion
+    // Fire render queue ended so we can grab the render metrics for each render group
+    {
+        fireRenderQueueEnded( firstRq, BLANKSTRING );
+    }
+    //////////////////////////////////////////
 
     Root::getSingleton()._popCurrentSceneManager(this);
 }
@@ -1389,7 +1397,7 @@ void SceneManager::prepareWorldGeometry(const String& filename)
         "SceneManager::prepareWorldGeometry");
 }
 //-----------------------------------------------------------------------
-void SceneManager::prepareWorldGeometry(DataStreamPtr& stream, 
+void SceneManager::prepareWorldGeometry(DataStreamPtr& stream,
     const String& typeName)
 {
     // This default implementation cannot handle world geometry
@@ -1407,7 +1415,7 @@ void SceneManager::setWorldGeometry(const String& filename)
         "SceneManager::setWorldGeometry");
 }
 //-----------------------------------------------------------------------
-void SceneManager::setWorldGeometry(DataStreamPtr& stream, 
+void SceneManager::setWorldGeometry(DataStreamPtr& stream,
     const String& typeName)
 {
     // This default implementation cannot handle world geometry
@@ -1434,7 +1442,7 @@ void SceneManager::_setSkyPlane(bool enable,
         MaterialPtr m = MaterialManager::getSingleton().getByName(materialName, groupName);
         if (m.isNull())
         {
-            OGRE_EXCEPT(Exception::ERR_INVALIDPARAMS, 
+            OGRE_EXCEPT(Exception::ERR_INVALIDPARAMS,
                 "Sky plane material '" + materialName + "' not found.",
                 "SceneManager::setSkyPlane");
         }
@@ -1461,17 +1469,17 @@ void SceneManager::_setSkyPlane(bool enable,
         {
             // Build a curved skyplane
             planeMesh = v1::MeshManager::getSingleton().createCurvedPlane(
-                meshName, groupName, plane, gscale * 100, gscale * 100, gscale * bow * 100, 
+                meshName, groupName, plane, gscale * 100, gscale * 100, gscale * bow * 100,
                 xsegments, ysegments, false, 1, tiling, tiling, up);
         }
         else
         {
             planeMesh = v1::MeshManager::getSingleton().createPlane(
-                meshName, groupName, plane, gscale * 100, gscale * 100, xsegments, ysegments, false, 
+                meshName, groupName, plane, gscale * 100, gscale * 100, xsegments, ysegments, false,
                 1, tiling, tiling, up);
         }
 
-        // Create entity 
+        // Create entity
         if (mSkyPlaneEntity)
         {
             // destroy old one
@@ -1480,7 +1488,7 @@ void SceneManager::_setSkyPlane(bool enable,
         }
         // Create, use the same name for mesh and entity
         // manually construct as we don't want this to be destroyed on destroyAllMovableObjects
-        MovableObjectFactory* factory = 
+        MovableObjectFactory* factory =
             Root::getSingleton().getMovableObjectFactory(v1::EntityFactory::FACTORY_TYPE_NAME);
         NameValuePairList params;
         params["mesh"] = meshName;
@@ -1525,8 +1533,8 @@ void SceneManager::setSkyPlane(
                                Real gscale,
                                Real tiling,
                                bool drawFirst,
-                               Real bow, 
-                               int xsegments, int ysegments, 
+                               Real bow,
+                               int xsegments, int ysegments,
                                const String& groupName)
 {
     _setSkyPlane(enable, plane, materialName, 0, gscale, tiling,
@@ -1545,13 +1553,13 @@ void SceneManager::_setSkyBox(bool enable,
         MaterialPtr m = MaterialManager::getSingleton().getByName(materialName, groupName);
         if (m.isNull())
         {
-            OGRE_EXCEPT(Exception::ERR_INVALIDPARAMS, 
+            OGRE_EXCEPT(Exception::ERR_INVALIDPARAMS,
                 "Sky box material '" + materialName + "' not found.",
                 "SceneManager::setSkyBox");
         }
         // Ensure loaded
         m->load();
-        if (!m->getBestTechnique() || 
+        if (!m->getBestTechnique() ||
             !m->getBestTechnique()->getNumPasses())
         {
             LogManager::getSingleton().logMessage(
@@ -1564,7 +1572,7 @@ void SceneManager::_setSkyBox(bool enable,
         if (pass->getNumTextureUnitStates() > 0 && pass->getTextureUnitState(0)->is3D())
             t3d = true;
 
-        // Create node 
+        // Create node
         if (!mSkyBoxNode)
         {
             mSkyBoxNode = createSceneNode( SCENE_DYNAMIC );
@@ -1590,7 +1598,7 @@ void SceneManager::_setSkyBox(bool enable,
             }
             mSkyBoxObj->clear();
         }
-        
+
         mSkyBoxObj->setRenderQueueGroup(renderQueue);
 
         if (t3d)
@@ -1644,10 +1652,10 @@ void SceneManager::_setSkyBox(bool enable,
             up = orientation * up;
             right = orientation * right;
 
-            
+
             if (t3d)
             {
-                // 3D cubic texture 
+                // 3D cubic texture
                 // Note UVs mirrored front/back
                 // I could save a few vertices here by sharing the corners
                 // since 3D coords will function correctly but it's really not worth
@@ -1728,7 +1736,7 @@ void SceneManager::_setSkyBox(bool enable,
                 // top right
                 mSkyBoxObj->position(middle + up + right);
                 mSkyBoxObj->textureCoord(1,0);
-                
+
                 mSkyBoxObj->quad(0, 1, 2, 3);
 
                 mSkyBoxObj->end();
@@ -1775,7 +1783,7 @@ void SceneManager::_setSkyDome(bool enable,
         MaterialPtr m = MaterialManager::getSingleton().getByName(materialName, groupName);
         if (m.isNull())
         {
-            OGRE_EXCEPT(Exception::ERR_INVALIDPARAMS, 
+            OGRE_EXCEPT(Exception::ERR_INVALIDPARAMS,
                 "Sky dome material '" + materialName + "' not found.",
                 "SceneManager::setSkyDome");
         }
@@ -1784,7 +1792,7 @@ void SceneManager::_setSkyDome(bool enable,
         // Ensure loaded
         m->load();
 
-        // Create node 
+        // Create node
         if (!mSkyDomeNode)
         {
             mSkyDomeNode = createSceneNode( SCENE_DYNAMIC );
@@ -1799,12 +1807,12 @@ void SceneManager::_setSkyDome(bool enable,
         for (int i = 0; i < 5; ++i)
         {
             v1::MeshPtr planeMesh = createSkydomePlane((BoxPlane)i, curvature,
-                tiling, distance, orientation, xsegments, ysegments, 
+                tiling, distance, orientation, xsegments, ysegments,
                 i!=BP_UP ? ySegmentsToKeep : -1, groupName);
 
             String entName = "SkyDomePlane" + StringConverter::toString(i);
 
-            // Create entity 
+            // Create entity
             if (mSkyDomeEntity[i])
             {
                 // destroy old one, do it by name for speed
@@ -1812,7 +1820,7 @@ void SceneManager::_setSkyDome(bool enable,
                 mSkyDomeEntity[i] = 0;
             }
             // construct manually so we don't have problems if destroyAllMovableObjects called
-            MovableObjectFactory* factory = 
+            MovableObjectFactory* factory =
                 Root::getSingleton().getMovableObjectFactory(v1::EntityFactory::FACTORY_TYPE_NAME);
 
             NameValuePairList params;
@@ -1856,7 +1864,7 @@ void SceneManager::setSkyDome(
                               int xsegments, int ysegments, int ySegmentsToKeep,
                               const String& groupName)
 {
-    _setSkyDome(enable, materialName, 0, curvature, tiling, distance, 
+    _setSkyDome(enable, materialName, 0, curvature, tiling, distance,
                 orientation, xsegments, ysegments, ySegmentsToKeep, groupName);
 }
 //-----------------------------------------------------------------------
@@ -1922,7 +1930,7 @@ v1::MeshPtr SceneManager::createSkyboxPlane(
     // Create new
     Real planeSize = distance * 2;
     const int BOX_SEGMENTS = 1;
-    planeMesh = mm.createPlane(meshName, groupName, plane, planeSize, planeSize, 
+    planeMesh = mm.createPlane(meshName, groupName, plane, planeSize, planeSize,
         BOX_SEGMENTS, BOX_SEGMENTS, false, 1, 1, 1, up);
 
     //planeMesh->_dumpContents(meshName);
@@ -1937,7 +1945,7 @@ v1::MeshPtr SceneManager::createSkydomePlane(
                                        Real tiling,
                                        Real distance,
                                        const Quaternion& orientation,
-                                       int xsegments, int ysegments, int ysegments_keep, 
+                                       int xsegments, int ysegments, int ysegments_keep,
                                        const String& groupName)
 {
 
@@ -1993,9 +2001,9 @@ v1::MeshPtr SceneManager::createSkydomePlane(
     }
     // Create new
     Real planeSize = distance * 2;
-    planeMesh = mm.createCurvedIllusionPlane(meshName, groupName, plane, 
-        planeSize, planeSize, curvature, 
-        xsegments, ysegments, false, 1, tiling, tiling, up, 
+    planeMesh = mm.createCurvedIllusionPlane(meshName, groupName, plane,
+        planeSize, planeSize, curvature,
+        xsegments, ysegments, false, 1, tiling, tiling, up,
         orientation, v1::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY,
         v1::HardwareBuffer::HBU_STATIC_WRITE_ONLY,
         false, false, ysegments_keep);
@@ -2804,7 +2812,7 @@ void SceneManager::updateSceneGraph()
 
     OgreProfileGroup( "updateSceneGraph", OGREPROF_GENERAL );
 
-    // Update controllers 
+    // Update controllers
     ControllerManager::getSingleton().updateAllControllers();
 
     highLevelCull();
@@ -2887,7 +2895,7 @@ void SceneManager::updateSceneGraph()
         mAutoParamDataSource->setTextureProjector( 0, i );
 }
 //-----------------------------------------------------------------------
-void SceneManager::renderSingleObject(Renderable* rend, const Pass* pass, 
+void SceneManager::renderSingleObject(Renderable* rend, const Pass* pass,
                                       bool lightScissoringClipping, bool doLightIteration )
 {
     unsigned short numMatrices;
@@ -2909,7 +2917,7 @@ void SceneManager::renderSingleObject(Renderable* rend, const Pass* pass,
 
     // Set world transformation
     numMatrices = rend->getNumWorldTransforms();
-    
+
     if (numMatrices > 0)
     {
         rend->getWorldTransforms(mTempXform);
@@ -2962,7 +2970,7 @@ void SceneManager::renderSingleObject(Renderable* rend, const Pass* pass,
         }
 
         // Sort out negative scaling
-        // Assume first world matrix representative 
+        // Assume first world matrix representative
         if (mFlipCullingOnNegativeScale)
         {
             CullingMode cullMode = mPassCullingMode;
@@ -3030,13 +3038,13 @@ void SceneManager::renderSingleObject(Renderable* rend, const Pass* pass,
 
                     LightList::iterator destit = localLightList.begin();
                     for (; destit != localLightList.end()
-                            && lightIndex < rendLightList.size(); 
+                            && lightIndex < rendLightList.size();
                         ++lightIndex, --lightsLeft)
                     {
                         Light const * currLight = rendLightList[lightIndex].light;
 
                         // Check whether we need to filter this one out
-                        if ((pass->getRunOnlyForOneLightType() && 
+                        if ((pass->getRunOnlyForOneLightType() &&
                             pass->getOnlyLightType() != currLight->getType()) ||
                             (pass->getLightMask() & currLight->getLightMask()) == 0)
                         {
@@ -3063,7 +3071,7 @@ void SceneManager::renderSingleObject(Renderable* rend, const Pass* pass,
                 else // !iterate per light
                 {
                     // Use complete light list potentially adjusted by start light
-                    if (pass->getStartLight() || pass->getMaxSimultaneousLights() != OGRE_MAX_SIMULTANEOUS_LIGHTS || 
+                    if (pass->getStartLight() || pass->getMaxSimultaneousLights() != OGRE_MAX_SIMULTANEOUS_LIGHTS ||
                         pass->getLightMask() != 0xFFFFFFFF)
                     {
                         // out of lights?
@@ -3080,10 +3088,10 @@ void SceneManager::renderSingleObject(Renderable* rend, const Pass* pass,
                             std::advance(copyStart, pass->getStartLight());
                             // Clamp lights to copy to avoid overrunning the end of the list
                             size_t lightsCopied = 0, lightsToCopy = std::min(
-                                static_cast<size_t>(pass->getMaxSimultaneousLights()), 
+                                static_cast<size_t>(pass->getMaxSimultaneousLights()),
                                 rendLightList.size() - pass->getStartLight());
 
-                            //localLightList.insert(localLightList.begin(), 
+                            //localLightList.insert(localLightList.begin(),
                             //  copyStart, copyEnd);
 
                             // Copy lights over
@@ -3120,7 +3128,7 @@ void SceneManager::renderSingleObject(Renderable* rend, const Pass* pass,
 
                     useLightsGpuProgram(pass, pLightListToUse);
                 }
-                // Do we need to update light states? 
+                // Do we need to update light states?
                 // Only do this if fixed-function vertex lighting applies
                 if (passSurfaceAndLightParams)
                 {
@@ -3129,33 +3137,33 @@ void SceneManager::renderSingleObject(Renderable* rend, const Pass* pass,
                 // optional light scissoring & clipping
                 ClipResult scissored = CLIPPED_NONE;
                 ClipResult clipped = CLIPPED_NONE;
-                if (lightScissoringClipping && 
+                if (lightScissoringClipping &&
                     (pass->getLightScissoringEnabled() || pass->getLightClipPlanesEnabled()))
                 {
-                    // if there's no lights hitting the scene, then we might as 
+                    // if there's no lights hitting the scene, then we might as
                     // well stop since clipping cannot include anything
                     if (pLightListToUse->empty())
                         continue;
 
                     if (pass->getLightScissoringEnabled())
                         scissored = buildAndSetScissor(*pLightListToUse, mCameraInProgress);
-                
+
                     if (pass->getLightClipPlanesEnabled())
                         clipped = buildAndSetLightClip(*pLightListToUse);
 
                     if (scissored == CLIPPED_ALL || clipped == CLIPPED_ALL)
                         continue;
                 }
-                // issue the render op      
+                // issue the render op
                 // nfz: check for gpu_multipass
                 mDestRenderSystem->setCurrentPassIterationCount(pass->getPassIterationCount());
                 // We might need to update the depth bias each iteration
                 /*if (pass->getIterationDepthBias() != 0.0f)
                 {
-                    float depthBiasBase = pass->getDepthBiasConstant() + 
+                    float depthBiasBase = pass->getDepthBiasConstant() +
                         pass->getIterationDepthBias() * depthInc;
-                    // depthInc deals with light iteration 
-                    
+                    // depthInc deals with light iteration
+
                     // Note that we have to set the depth bias here even if the depthInc
                     // is zero (in which case you would think there is no change from
                     // what was set in _setPass(). The reason is that if there are
@@ -3167,8 +3175,8 @@ void SceneManager::renderSingleObject(Renderable* rend, const Pass* pass,
                     mDestRenderSystem->_setDepthBias(depthBiasBase, pass->getDepthBiasSlopeScale());
 
                     // Set to increment internally too if rendersystem iterates
-                    mDestRenderSystem->setDeriveDepthBias(true, 
-                        depthBiasBase, pass->getIterationDepthBias(), 
+                    mDestRenderSystem->setDeriveDepthBias(true,
+                        depthBiasBase, pass->getIterationDepthBias(),
                         pass->getDepthBiasSlopeScale());
                 }
                 else
@@ -3198,7 +3206,7 @@ void SceneManager::renderSingleObject(Renderable* rend, const Pass* pass,
             bool skipBecauseOfLightType = false;
             if (pass->getRunOnlyForOneLightType())
             {
-                if( rend->getLights().size() == 1 && 
+                if( rend->getLights().size() == 1 &&
                     rend->getLights().at(0).light->getType() != pass->getOnlyLightType() )
                 {
                     skipBecauseOfLightType = true;
@@ -3240,11 +3248,11 @@ void SceneManager::renderSingleObject(Renderable* rend, const Pass* pass,
                 {
                     clipped = buildAndSetLightClip( *lightList );
                 }
-    
+
                 // don't bother rendering if clipped / scissored entirely
                 if (scissored != CLIPPED_ALL && clipped != CLIPPED_ALL)
                 {
-                    // issue the render op      
+                    // issue the render op
                     // nfz: set up multipass rendering
                     mDestRenderSystem->setCurrentPassIterationCount(pass->getPassIterationCount());
                     // Finalise GPU parameter bindings
@@ -3260,7 +3268,7 @@ void SceneManager::renderSingleObject(Renderable* rend, const Pass* pass,
                     resetScissor();
                 if (clipped == CLIPPED_SOME)
                     resetLightClip();*/
-                
+
             } // !skipBecauseOfLightType
         }
 
@@ -3283,12 +3291,12 @@ void SceneManager::renderSingleObject(Renderable* rend, const Pass* pass,
                             "Exception when rendering material: " + pass->getParent()->getParent()->getName() +
                             "\nOriginal Exception description: " + e.getFullDescription() + "\n" ,
                             "SceneManager::renderSingleObject");
-                
+
             }
         }
         rend->postRender(this, mDestRenderSystem);
     }
-    
+
     // Reset view / projection changes if any
     resetViewProjMode(passTransformState);
     OgreProfileEndGPUEvent("Material: " + pass->getParent()->getParent()->getName());
@@ -3394,8 +3402,8 @@ v1::Animation* SceneManager::getAnimation(const String& name) const
     AnimationList::const_iterator i = mAnimationsList.find(name);
     if (i == mAnimationsList.end())
     {
-        OGRE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, 
-            "Cannot find animation with name " + name, 
+        OGRE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND,
+            "Cannot find animation with name " + name,
             "SceneManager::getAnimation");
     }
     return i->second;
@@ -3417,8 +3425,8 @@ void SceneManager::destroyAnimation(const String& name)
     AnimationList::iterator i = mAnimationsList.find(name);
     if (i == mAnimationsList.end())
     {
-        OGRE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, 
-            "Cannot find animation with name " + name, 
+        OGRE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND,
+            "Cannot find animation with name " + name,
             "SceneManager::getAnimation");
     }
 
@@ -3492,16 +3500,16 @@ void SceneManager::_applySceneAnimations(void)
         v1::Animation::NodeTrackIterator nodeTrackIt = anim->getNodeTrackIterator();
         while(nodeTrackIt.hasMoreElements())
         {
-			nodeTrackIt.getNext()->resetNodeToInitialState();
+                        nodeTrackIt.getNext()->resetNodeToInitialState();
         }
 
         v1::Animation::OldNodeTrackIterator OldNodeTrackIt = anim->getOldNodeTrackIterator();
-		while(OldNodeTrackIt.hasMoreElements())
-		{
+                while(OldNodeTrackIt.hasMoreElements())
+                {
             v1::OldNode* nd = OldNodeTrackIt.getNext()->getAssociatedNode();
-			if (nd)
-				nd->resetToInitialState();
-		}
+                        if (nd)
+                                nd->resetToInitialState();
+                }
 
         v1::Animation::NumericTrackIterator numTrackIt = anim->getNumericTrackIterator();
         while(numTrackIt.hasMoreElements())
@@ -3551,7 +3559,7 @@ void SceneManager::useRenderableViewProjMode(const Renderable* pRend, bool fixed
         mResetIdentityProj = true;
     }
 
-    
+
 }
 //---------------------------------------------------------------------
 void SceneManager::resetViewProjMode(bool fixedFunction)
@@ -3565,7 +3573,7 @@ void SceneManager::resetViewProjMode(bool fixedFunction)
 
         mResetIdentityView = false;
     }
-    
+
     if (mResetIdentityProj)
     {
         // Coming back from flat projection
@@ -3575,7 +3583,7 @@ void SceneManager::resetViewProjMode(bool fixedFunction)
 
         mResetIdentityProj = false;
     }
-    
+
 
 }
 //---------------------------------------------------------------------
@@ -3702,7 +3710,7 @@ bool SceneManager::fireRenderQueueEnded(uint8 id, const String& invocation)
 }
 //---------------------------------------------------------------------
 void SceneManager::fireRenderSingleObject(Renderable* rend, const Pass* pass,
-                                           const AutoParamDataSource* source, 
+                                           const AutoParamDataSource* source,
                                            const LightList* pLightList, bool suppressRenderStateChanges)
 {
     RenderObjectListenerList::iterator i, iend;
@@ -3787,7 +3795,7 @@ void SceneManager::setViewport(Viewport* vp)
     MaterialManager::getSingleton().setActiveScheme(vp->getMaterialScheme());
 }
 //---------------------------------------------------------------------
-void SceneManager::showBoundingBoxes(bool bShow) 
+void SceneManager::showBoundingBoxes(bool bShow)
 {
     mShowBoundingBoxes = bShow;
 }
@@ -3798,22 +3806,22 @@ bool SceneManager::getShowBoundingBoxes() const
 }
 //---------------------------------------------------------------------
 void SceneManager::_addAutotrackingSceneNode( SceneNode* source, SceneNode* target,
-												const Vector3 &offset, const Vector3 &localDirection )
+                                                                                                const Vector3 &offset, const Vector3 &localDirection )
 {
-	_removeAutotrackingSceneNode( source );
-	mAutoTrackingSceneNodes.push_back( AutoTrackingSceneNode( source, target, offset, localDirection ) );
+        _removeAutotrackingSceneNode( source );
+        mAutoTrackingSceneNodes.push_back( AutoTrackingSceneNode( source, target, offset, localDirection ) );
 }
 //---------------------------------------------------------------------
 void SceneManager::_removeAutotrackingSceneNode( SceneNode* source )
 {
-	AutoTrackingSceneNodeVec::iterator itor = mAutoTrackingSceneNodes.begin();
-	AutoTrackingSceneNodeVec::iterator end  = mAutoTrackingSceneNodes.end();
+        AutoTrackingSceneNodeVec::iterator itor = mAutoTrackingSceneNodes.begin();
+        AutoTrackingSceneNodeVec::iterator end  = mAutoTrackingSceneNodes.end();
 
-	while( itor != end && itor->source != source )
-		++itor;
+        while( itor != end && itor->source != source )
+                ++itor;
 
-	if( itor != end )
-		efficientVectorRemove( mAutoTrackingSceneNodes, itor );
+        if( itor != end )
+                efficientVectorRemove( mAutoTrackingSceneNodes, itor );
 }
 //---------------------------------------------------------------------
 void SceneManager::_suppressRenderStateChanges(bool suppress)
@@ -3823,18 +3831,18 @@ void SceneManager::_suppressRenderStateChanges(bool suppress)
 //---------------------------------------------------------------------
 const Pass* SceneManager::deriveShadowCasterPass(const Pass* pass)
 {
-    Pass* retPass;  
+    Pass* retPass;
     if (!pass->getParent()->getShadowCasterMaterial().isNull())
     {
-        return pass->getParent()->getShadowCasterMaterial()->getBestTechnique()->getPass(0); 
+        return pass->getParent()->getShadowCasterMaterial()->getBestTechnique()->getPass(0);
     }
-    else 
+    else
     {
-        retPass = mShadowTextureCustomCasterPass ? 
+        retPass = mShadowTextureCustomCasterPass ?
             mShadowTextureCustomCasterPass : mShadowCasterPlainBlackPass;
     }
 
-    
+
     // Special case alpha-blended passes
     /*if ((pass->getSourceBlendFactor() == SBF_SOURCE_ALPHA &&
         pass->getDestBlendFactor() == SBF_ONE_MINUS_SOURCE_ALPHA))
@@ -3899,7 +3907,7 @@ const Pass* SceneManager::deriveShadowCasterPass(const Pass* pass)
             pass->getShadowCasterVertexProgramParameters());
         // Also have to hack the light autoparams, that is done later
     }
-    else 
+    else
     {
         if (retPass == mShadowTextureCustomCasterPass)
         {
@@ -3940,7 +3948,7 @@ const Pass* SceneManager::deriveShadowCasterPass(const Pass* pass)
                                             pass->getShadowCasterFragmentProgramParameters());
         // Also have to hack the light autoparams, that is done later
     }
-    else 
+    else
     {
         if (retPass == mShadowTextureCustomCasterPass)
         {
@@ -3963,7 +3971,7 @@ const Pass* SceneManager::deriveShadowCasterPass(const Pass* pass)
             retPass->setFragmentProgram(BLANKSTRING);
         }
     }
-    
+
     // handle the case where there is no fixed pipeline support
     retPass->getParent()->getParent()->compile();
     Technique* btech = retPass->getParent()->getParent()->getBestTechnique();
@@ -4031,7 +4039,7 @@ ClipResult SceneManager::buildAndSetScissor(const LightList& ll, const Camera* c
     }
 
     // Some scissoring?
-    if (finalRect.left > -1.0f || finalRect.right < 1.0f || 
+    if (finalRect.left > -1.0f || finalRect.right < 1.0f ||
         finalRect.bottom > -1.0f || finalRect.top < 1.0f)
     {
         // Turn normalised device coordinates into pixels
@@ -4131,7 +4139,7 @@ void SceneManager::propagateRelativeOrigin( SceneNode *sceneNode, const Vector3 
         {
             MovableObject *attachedObj = sceneNode->getAttachedObject( i );
 
-            CameraMap::const_iterator itor = mCamerasByName.find( attachedObj->getName() ); 
+            CameraMap::const_iterator itor = mCamerasByName.find( attachedObj->getName() );
             if( itor != mCamerasByName.end() && attachedObj == itor->second )
                 ++numAttachedCameras;
         }
@@ -4230,7 +4238,7 @@ const PlaneList& SceneManager::getLightClippingPlanes( const Light* l )
         ci->second.clipPlanesValid = true;
     }
     return ci->second.clipPlanes;
-    
+
 }
 //---------------------------------------------------------------------
 ClipResult SceneManager::buildAndSetLightClip(const LightList& ll)
@@ -4257,7 +4265,7 @@ ClipResult SceneManager::buildAndSetLightClip(const LightList& ll)
     if (clipBase)
     {
         const PlaneList& clipPlanes = getLightClippingPlanes(clipBase);
-        
+
         mDestRenderSystem->setClipPlanes(clipPlanes);
         return CLIPPED_SOME;
     }
@@ -4388,7 +4396,7 @@ void SceneManager::setShadowTextureCasterMaterial(const String& name)
         if (mat.isNull())
         {
             OGRE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND,
-                "Cannot locate material called '" + name + "'", 
+                "Cannot locate material called '" + name + "'",
                 "SceneManager::setShadowTextureCasterMaterial");
         }
         mat->load();
@@ -4404,17 +4412,17 @@ void SceneManager::setShadowTextureCasterMaterial(const String& name)
             if (mShadowTextureCustomCasterPass->hasVertexProgram())
             {
                 // Save vertex program and params in case we have to swap them out
-                mShadowTextureCustomCasterVertexProgram = 
+                mShadowTextureCustomCasterVertexProgram =
                     mShadowTextureCustomCasterPass->getVertexProgramName();
-                mShadowTextureCustomCasterVPParams = 
+                mShadowTextureCustomCasterVPParams =
                     mShadowTextureCustomCasterPass->getVertexProgramParameters();
             }
             if (mShadowTextureCustomCasterPass->hasFragmentProgram())
             {
                 // Save fragment program and params in case we have to swap them out
-                mShadowTextureCustomCasterFragmentProgram = 
+                mShadowTextureCustomCasterFragmentProgram =
                 mShadowTextureCustomCasterPass->getFragmentProgramName();
-                mShadowTextureCustomCasterFPParams = 
+                mShadowTextureCustomCasterFPParams =
                 mShadowTextureCustomCasterPass->getFragmentProgramParameters();
             }
         }
@@ -4447,7 +4455,7 @@ SceneManager::RenderContext* SceneManager::_pauseRendering()
     return context;
 }
 //---------------------------------------------------------------------
-void SceneManager::_resumeRendering(SceneManager::RenderContext* context) 
+void SceneManager::_resumeRendering(SceneManager::RenderContext* context)
 {
     delete mRenderQueue;
     mRenderQueue = context->renderQueue;
@@ -4469,7 +4477,7 @@ void SceneManager::_resumeRendering(SceneManager::RenderContext* context)
     if (mDestRenderSystem->getCapabilities()->hasCapability(RSC_USER_CLIP_PLANES))
     {
         mDestRenderSystem->resetClipPlanes();
-        if (camera->isWindowSet())  
+        if (camera->isWindowSet())
         {
             mDestRenderSystem->setClipPlanes(camera->getWindowPlanes());
         }
@@ -4479,7 +4487,7 @@ void SceneManager::_resumeRendering(SceneManager::RenderContext* context)
 
     // Set initial camera state
     mDestRenderSystem->_setProjectionMatrix(mCameraInProgress->getProjectionMatrixRS());
-    
+
     mCachedViewMatrix = mCameraInProgress->getViewMatrix(true);
 
     setViewMatrix(mCachedViewMatrix);
@@ -4491,8 +4499,8 @@ v1::StaticGeometry* SceneManager::createStaticGeometry(const String& name)
     // Check not existing
     if (mStaticGeometryList.find(name) != mStaticGeometryList.end())
     {
-        OGRE_EXCEPT(Exception::ERR_DUPLICATE_ITEM, 
-            "StaticGeometry with name '" + name + "' already exists!", 
+        OGRE_EXCEPT(Exception::ERR_DUPLICATE_ITEM,
+            "StaticGeometry with name '" + name + "' already exists!",
             "SceneManager::createStaticGeometry");
     }
     v1::StaticGeometry* ret = OGRE_NEW v1::StaticGeometry(this, name);
@@ -4505,8 +4513,8 @@ v1::StaticGeometry* SceneManager::getStaticGeometry(const String& name) const
     StaticGeometryList::const_iterator i = mStaticGeometryList.find(name);
     if (i == mStaticGeometryList.end())
     {
-        OGRE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, 
-            "StaticGeometry with name '" + name + "' not found", 
+        OGRE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND,
+            "StaticGeometry with name '" + name + "' not found",
             "SceneManager::createStaticGeometry");
     }
     return i->second;
@@ -4557,8 +4565,8 @@ v1::InstanceManager* SceneManager::createInstanceManager( const String &customNa
                                                           customName, v1::InstanceManagerCmp() );
     if (itor != mInstanceManagers.end() && (*itor)->getName() == customName )
     {
-        OGRE_EXCEPT( Exception::ERR_DUPLICATE_ITEM, 
-            "InstancedManager with name '" + customName + "' already exists!", 
+        OGRE_EXCEPT( Exception::ERR_DUPLICATE_ITEM,
+            "InstancedManager with name '" + customName + "' already exists!",
             "SceneManager::createInstanceManager");
     }
 
@@ -4577,7 +4585,7 @@ v1::InstanceManager* SceneManager::getInstanceManager( IdString managerName ) co
                                                                 managerName, v1::InstanceManagerCmp() );
     if (itor == mInstanceManagers.end() || (*itor)->getName() != managerName )
     {
-        OGRE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, 
+        OGRE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND,
                 "InstancedManager with name '" + managerName.getFriendlyText() + "' not found",
                 "SceneManager::getInstanceManager");
     }
@@ -4629,7 +4637,7 @@ size_t SceneManager::getNumInstancesPerBatch( const String &meshName, const Stri
 {
     v1::InstanceManager tmpMgr( "TmpInstanceManager", this, meshName, groupName,
                                 technique, flags, numInstancesPerBatch, subMeshIdx );
-    
+
     return tmpMgr.getMaxOrBestNumInstancesPerBatch( materialName, numInstancesPerBatch, flags );
 }
 //---------------------------------------------------------------------
@@ -4642,8 +4650,8 @@ v1::InstancedEntity* SceneManager::createInstancedEntity( const String &material
 
     if (itor == mInstanceManagers.end() || (*itor)->getName() != managerName )
     {
-        OGRE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, 
-                "InstancedManager with name '" + managerName + "' not found", 
+        OGRE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND,
+                "InstancedManager with name '" + managerName + "' not found",
                 "SceneManager::createInstanceEntity");
     }
 
@@ -4698,7 +4706,7 @@ void SceneManager::updateInstanceManagers(void)
     }
 }
 //---------------------------------------------------------------------
-AxisAlignedBoxSceneQuery* 
+AxisAlignedBoxSceneQuery*
 SceneManager::createAABBQuery(const AxisAlignedBox& box, uint32 mask)
 {
     DefaultAxisAlignedBoxSceneQuery* q = OGRE_NEW DefaultAxisAlignedBoxSceneQuery(this);
@@ -4707,7 +4715,7 @@ SceneManager::createAABBQuery(const AxisAlignedBox& box, uint32 mask)
     return q;
 }
 //---------------------------------------------------------------------
-SphereSceneQuery* 
+SphereSceneQuery*
 SceneManager::createSphereQuery(const Sphere& sphere, uint32 mask)
 {
     DefaultSphereSceneQuery* q = OGRE_NEW DefaultSphereSceneQuery(this);
@@ -4716,8 +4724,8 @@ SceneManager::createSphereQuery(const Sphere& sphere, uint32 mask)
     return q;
 }
 //---------------------------------------------------------------------
-PlaneBoundedVolumeListSceneQuery* 
-SceneManager::createPlaneBoundedVolumeQuery(const PlaneBoundedVolumeList& volumes, 
+PlaneBoundedVolumeListSceneQuery*
+SceneManager::createPlaneBoundedVolumeQuery(const PlaneBoundedVolumeList& volumes,
                                             uint32 mask)
 {
     DefaultPlaneBoundedVolumeListSceneQuery* q = OGRE_NEW DefaultPlaneBoundedVolumeListSceneQuery(this);
@@ -4727,7 +4735,7 @@ SceneManager::createPlaneBoundedVolumeQuery(const PlaneBoundedVolumeList& volume
 }
 
 //---------------------------------------------------------------------
-RaySceneQuery* 
+RaySceneQuery*
 SceneManager::createRayQuery(const Ray& ray, uint32 mask)
 {
     DefaultRaySceneQuery* q = OGRE_NEW DefaultRaySceneQuery(this);
@@ -4736,7 +4744,7 @@ SceneManager::createRayQuery(const Ray& ray, uint32 mask)
     return q;
 }
 //---------------------------------------------------------------------
-IntersectionSceneQuery* 
+IntersectionSceneQuery*
 SceneManager::createIntersectionQuery(uint32 mask)
 {
 
@@ -4750,13 +4758,13 @@ void SceneManager::destroyQuery(SceneQuery* query)
     OGRE_DELETE query;
 }
 //---------------------------------------------------------------------
-SceneManager::MovableObjectCollection* 
+SceneManager::MovableObjectCollection*
 SceneManager::getMovableObjectCollection(const String& typeName)
 {
     // lock collection mutex
     OGRE_LOCK_MUTEX(mMovableObjectCollectionMapMutex);
 
-    MovableObjectCollectionMap::iterator i = 
+    MovableObjectCollectionMap::iterator i =
         mMovableObjectCollectionMap.find(typeName);
     if (i == mMovableObjectCollectionMap.end())
     {
@@ -4771,18 +4779,18 @@ SceneManager::getMovableObjectCollection(const String& typeName)
     }
 }
 //---------------------------------------------------------------------
-const SceneManager::MovableObjectCollection* 
+const SceneManager::MovableObjectCollection*
 SceneManager::getMovableObjectCollection(const String& typeName) const
 {
     // lock collection mutex
     OGRE_LOCK_MUTEX(mMovableObjectCollectionMapMutex);
 
-    MovableObjectCollectionMap::const_iterator i = 
+    MovableObjectCollectionMap::const_iterator i =
         mMovableObjectCollectionMap.find(typeName);
     if (i == mMovableObjectCollectionMap.end())
     {
-        OGRE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND, 
-            "Object collection named '" + typeName + "' does not exist.", 
+        OGRE_EXCEPT(Exception::ERR_ITEM_NOT_FOUND,
+            "Object collection named '" + typeName + "' does not exist.",
             "SceneManager::getMovableObjectCollection");
     }
     else
@@ -4800,7 +4808,7 @@ MovableObject* SceneManager::createMovableObject( const String& typeName,
     {
         return createCamera( "", true );
     }
-    MovableObjectFactory* factory = 
+    MovableObjectFactory* factory =
         Root::getSingleton().getMovableObjectFactory(typeName);
     // Check for duplicate names
     MovableObjectCollection* objectMap = getMovableObjectCollection(typeName);
@@ -4855,7 +4863,7 @@ void SceneManager::destroyMovableObject( MovableObject *m, const String& typeNam
         return;
     }
     MovableObjectCollection* objectMap = getMovableObjectCollection(typeName);
-    MovableObjectFactory* factory = 
+    MovableObjectFactory* factory =
         Root::getSingleton().getMovableObjectFactory(typeName);
 
     {
@@ -4885,9 +4893,9 @@ void SceneManager::destroyAllMovableObjectsByType(const String& typeName)
         return;
     }
     MovableObjectCollection* objectMap = getMovableObjectCollection(typeName);
-    MovableObjectFactory* factory = 
+    MovableObjectFactory* factory =
         Root::getSingleton().getMovableObjectFactory(typeName);
-    
+
     {
             OGRE_LOCK_MUTEX(objectMap->mutex);
         MovableObjectVec::iterator itor = objectMap->movableObjects.begin();
@@ -4931,7 +4939,7 @@ void SceneManager::destroyAllMovableObjects(void)
         if (Root::getSingleton().hasMovableObjectFactory(ci->first))
         {
             // Only destroy if we have a factory instance; otherwise must be injected
-            MovableObjectFactory* factory = 
+            MovableObjectFactory* factory =
                 Root::getSingleton().getMovableObjectFactory(ci->first);
 
             MovableObjectVec::iterator itor = coll->movableObjects.begin();
@@ -4961,7 +4969,7 @@ void SceneManager::destroyAllMovableObjects(void)
 }
 
 //---------------------------------------------------------------------
-SceneManager::MovableObjectIterator 
+SceneManager::MovableObjectIterator
 SceneManager::getMovableObjectIterator(const String& typeName)
 {
     MovableObjectCollection* objectMap = getMovableObjectCollection(typeName);
@@ -5168,7 +5176,7 @@ void SceneManager::updateGpuProgramParameters(const Pass* pass)
 
         if (pass->hasVertexProgram())
         {
-            mDestRenderSystem->bindGpuProgramParameters(GPT_VERTEX_PROGRAM, 
+            mDestRenderSystem->bindGpuProgramParameters(GPT_VERTEX_PROGRAM,
                 pass->getVertexProgramParameters(), mGpuParamsDirty);
         }
 
@@ -5180,25 +5188,25 @@ void SceneManager::updateGpuProgramParameters(const Pass* pass)
 
         if (pass->hasFragmentProgram())
         {
-            mDestRenderSystem->bindGpuProgramParameters(GPT_FRAGMENT_PROGRAM, 
+            mDestRenderSystem->bindGpuProgramParameters(GPT_FRAGMENT_PROGRAM,
                 pass->getFragmentProgramParameters(), mGpuParamsDirty);
         }
 
         if (pass->hasTessellationHullProgram())
         {
-            mDestRenderSystem->bindGpuProgramParameters(GPT_HULL_PROGRAM, 
+            mDestRenderSystem->bindGpuProgramParameters(GPT_HULL_PROGRAM,
                 pass->getTessellationHullProgramParameters(), mGpuParamsDirty);
         }
 
         if (pass->hasTessellationDomainProgram())
         {
-            mDestRenderSystem->bindGpuProgramParameters(GPT_DOMAIN_PROGRAM, 
+            mDestRenderSystem->bindGpuProgramParameters(GPT_DOMAIN_PROGRAM,
                 pass->getTessellationDomainProgramParameters(), mGpuParamsDirty);
         }
 
                 // if (pass->hasComputeProgram())
         // {
-                //     mDestRenderSystem->bindGpuProgramParameters(GPT_COMPUTE_PROGRAM, 
+                //     mDestRenderSystem->bindGpuProgramParameters(GPT_COMPUTE_PROGRAM,
                 //                                                 pass->getComputeProgramParameters(), mGpuParamsDirty);
         // }
 

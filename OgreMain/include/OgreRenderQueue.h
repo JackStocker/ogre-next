@@ -75,7 +75,7 @@ namespace Ogre {
             material to renderable object is wrapped in a class for ease of use.
         @par
             This class now includes the concept of 'queue groups' which allows the application
-            adding the renderable to specifically schedule it so that it is included in 
+            adding the renderable to specifically schedule it so that it is included in
             a discrete group. Good for separating renderables into the main scene,
             backgrounds and overlays, and also could be used in the future for more
             complex multipass routines like stenciling.
@@ -174,12 +174,12 @@ namespace Ogre {
 
         /// Renders in a compatible way with GL 3.3 and D3D11. Can only render V2 objects
         /// (i.e. Items, VertexArrayObject)
-        unsigned char* renderGL3( bool casterPass, bool dualParaboloid,
+        unsigned char* renderGL3( RenderSystem *rs, bool casterPass, bool dualParaboloid,
                         HlmsCache passCache[],
                         const RenderQueueGroup &renderQueueGroup,
                         IndirectBufferPacked *indirectBuffer,
                         unsigned char *indirectDraw, unsigned char *startIndirectDraw );
-        void renderGL3V1( bool casterPass, bool dualParaboloid,
+        void renderGL3V1( RenderSystem *rs, bool casterPass, bool dualParaboloid,
                           HlmsCache passCache[],
                           const RenderQueueGroup &renderQueueGroup );
 
@@ -228,7 +228,7 @@ namespace Ogre {
 
         /// Called when the frame has fully ended (ALL passes have been executed to all RTTs)
         void frameEnded(void);
-		
+
         /** Sets the mode for the RenderQueue ID. @see RenderQueue::Modes
         @param rqId
             ID of the render queue

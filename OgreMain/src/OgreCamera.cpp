@@ -174,7 +174,7 @@ namespace Ogre {
             updateView();
             mRealOrientation.ToAxes(axes);
             Quaternion rotQuat;
-            if ( (axes[2]+zAdjustVec).squaredLength() <  0.00005f) 
+            if ( (axes[2]+zAdjustVec).squaredLength() <  0.00005f)
             {
                 // Oops, a 180 degree turn (infinite possible rotation axes)
                 // Default to yaw i.e. use current UP
@@ -318,7 +318,7 @@ namespace Ogre {
         }
 
         // Deriving reflection from linked plane?
-        if (mReflect && mLinkedReflectPlane && 
+        if (mReflect && mLinkedReflectPlane &&
             !(mLastLinkedReflectionPlane == mLinkedReflectPlane->_getDerivedPlane()))
         {
             mReflectPlane = mLinkedReflectPlane->_getDerivedPlane();
@@ -454,27 +454,15 @@ namespace Ogre {
     }
 
     //-----------------------------------------------------------------------
-    void Camera::_notifyRenderedFaces(unsigned int numfaces)
-    {
-        mVisFacesLastRender = numfaces;
-    }
+    void Camera::_notifyRenderedFaces( size_t numfaces ) { mVisFacesLastRender = numfaces; }
 
     //-----------------------------------------------------------------------
-    void Camera::_notifyRenderedBatches(unsigned int numbatches)
-    {
-        mVisBatchesLastRender = numbatches;
-    }
+    void Camera::_notifyRenderedBatches( size_t numbatches ) { mVisBatchesLastRender = numbatches; }
 
     //-----------------------------------------------------------------------
-    unsigned int Camera::_getNumRenderedFaces(void) const
-    {
-        return mVisFacesLastRender;
-    }
+    size_t Camera::_getNumRenderedFaces( void ) const { return mVisFacesLastRender; }
     //-----------------------------------------------------------------------
-    unsigned int Camera::_getNumRenderedBatches(void) const
-    {
-        return mVisBatchesLastRender;
-    }
+    size_t Camera::_getNumRenderedBatches( void ) const { return mVisBatchesLastRender; }
     //-----------------------------------------------------------------------
     const Quaternion& Camera::getOrientation(void) const
     {
@@ -550,7 +538,7 @@ namespace Ogre {
         return mRealOrientation * Vector3::UNIT_X;
     }
     //-----------------------------------------------------------------------
-    void Camera::getWorldTransforms(Matrix4* mat) const 
+    void Camera::getWorldTransforms(Matrix4* mat) const
     {
         updateView();
 
@@ -565,7 +553,7 @@ namespace Ogre {
         return msMovableType;
     }
     //-----------------------------------------------------------------------
-    void Camera::setAutoTracking(bool enabled, SceneNode* const target, 
+    void Camera::setAutoTracking(bool enabled, SceneNode* const target,
         const Vector3& offset)
     {
         if (enabled)
@@ -646,7 +634,7 @@ namespace Ogre {
 
         // Get ray origin and ray target on near plane in world space
         Vector3 rayOrigin, rayTarget;
-        
+
         rayOrigin = inverseVP * nearPoint;
         rayTarget = inverseVP * midPoint;
 
@@ -655,20 +643,20 @@ namespace Ogre {
 
         outRay->setOrigin(rayOrigin);
         outRay->setDirection(rayDirection);
-    } 
+    }
     //---------------------------------------------------------------------
-    PlaneBoundedVolume Camera::getCameraToViewportBoxVolume(Real screenLeft, 
+    PlaneBoundedVolume Camera::getCameraToViewportBoxVolume(Real screenLeft,
         Real screenTop, Real screenRight, Real screenBottom, bool includeFarPlane)
     {
         PlaneBoundedVolume vol;
-        getCameraToViewportBoxVolume(screenLeft, screenTop, screenRight, screenBottom, 
+        getCameraToViewportBoxVolume(screenLeft, screenTop, screenRight, screenBottom,
             &vol, includeFarPlane);
         return vol;
 
     }
     //---------------------------------------------------------------------()
-    void Camera::getCameraToViewportBoxVolume(Real screenLeft, 
-        Real screenTop, Real screenRight, Real screenBottom, 
+    void Camera::getCameraToViewportBoxVolume(Real screenLeft,
+        Real screenTop, Real screenRight, Real screenBottom,
         PlaneBoundedVolume* outVolume, bool includeFarPlane)
     {
         outVolume->planes.clear();
@@ -725,7 +713,7 @@ namespace Ogre {
                 Plane(mFrustumPlanes[FRUSTUM_PLANE_BOTTOM].normal, br.getOrigin()));
             outVolume->planes.push_back(
                 Plane(mFrustumPlanes[FRUSTUM_PLANE_LEFT].normal, ul.getOrigin()));
-            
+
 
         }
 
@@ -903,7 +891,7 @@ namespace Ogre {
         }
     }
     //-----------------------------------------------------------------------
-    bool Camera::projectSphere(const Sphere& sphere, 
+    bool Camera::projectSphere(const Sphere& sphere,
         Real* left, Real* top, Real* right, Real* bottom) const
     {
         if (mCullFrustum)
@@ -989,7 +977,7 @@ namespace Ogre {
         // constant variable
         Real delta = planeOffset - anchor.z;
 
-        // now set the intersection point and note whether it is a 
+        // now set the intersection point and note whether it is a
         // point at infinity or straddles infinity
         unsigned int i;
         for (i=0; i<4; i++)
@@ -1015,7 +1003,7 @@ namespace Ogre {
             else
             {
                 // handle the infinite points of intersection;
-                // cases split up into the possible frustum planes 
+                // cases split up into the possible frustum planes
                 // pieces which may contain a finite intersection point
                 int nextind = (i+1) % 4;
                 int prevind = (i+3) % 4;
@@ -1026,7 +1014,7 @@ namespace Ogre {
                     else
                     {
                         // handle the intersection points that straddle infinity (back-project)
-                        if(infpt[prevind] == 0) 
+                        if(infpt[prevind] == 0)
                         {
                             Vector3 temp = vec[prevind] - vec[i];
                             res.push_back(Vector4(temp.x, temp.y, temp.z, 0.0));
@@ -1081,16 +1069,16 @@ namespace Ogre {
         Vector3 lPos = invPlaneRot * getDerivedPosition();
         Vector3 vec[4];
         vec[0] = invPlaneRot * trCorner - lPos;
-        vec[1] = invPlaneRot * tlCorner - lPos; 
-        vec[2] = invPlaneRot * blCorner - lPos; 
-        vec[3] = invPlaneRot * brCorner - lPos; 
+        vec[1] = invPlaneRot * tlCorner - lPos;
+        vec[2] = invPlaneRot * blCorner - lPos;
+        vec[3] = invPlaneRot * brCorner - lPos;
 
         // compute intersection points on plane
         vector<Vector4>::type iPnt = getRayForwardIntersect(lPos, vec, -pval.d);
 
 
         // return wanted data
-        if(intersect3d) 
+        if(intersect3d)
         {
             Quaternion planeRot = invPlaneRot.Inverse();
             (*intersect3d).clear();
