@@ -194,6 +194,11 @@ namespace Ogre {
         XVisualInfo* getVisualFromFBConfig(GLXFBConfig fbConfig);
 
     private:
+         ////////////////////////////////////////////////////////////////
+         /// Champion custom
+         void
+         GetDisplayModes () ;
+         ////////////////////////////////////////////////////////////////
 
         /**
          * Refresh config options to reflect dependencies

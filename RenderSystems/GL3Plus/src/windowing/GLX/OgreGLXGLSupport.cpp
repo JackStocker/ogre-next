@@ -52,6 +52,264 @@ static int ctxErrorHandler( Display *dpy, XErrorEvent *ev )
 
 namespace Ogre
 {
+//////////////////////////////////////////////////////////////////////
+/// Champion custom
+///
+// Support for xRandr 1.2+ to get the correct display refresh rates
+
+// Randr versions
+#define EXTENSION_VERSION(major,minor)\
+    (major << 16) | minor;
+
+// Randr versions
+#define RANDR_1_1 ((1 << 16) | 1)
+#define RANDR_1_2 ((1 << 16) | 2)
+#define RANDR_1_3 ((1 << 16) | 3)
+#define RANDR_1_4 ((1 << 16) | 4)
+
+void
+GLXGLSupport::
+GetDisplayModes ()
+{
+   int screen = DefaultScreen(mXDisplay);
+
+   int error=0;
+   long mEventMask;
+   int  mEventBase;
+   int mOpCode;
+
+   int mVersion=0;
+   int mVersionMajor,mVersionMinor;
+
+   if ( XRRQueryExtension( mXDisplay, &mEventBase, &error ) ) {
+
+       XRRQueryVersion(mXDisplay, &mVersionMajor, &mVersionMinor);
+       mVersion = EXTENSION_VERSION(mVersionMajor, mVersionMinor);
+   }
+
+   if (mVersion==0)
+   {
+       throw std::runtime_error("Failed to get X Display");
+   }
+
+   mEventMask =
+       RRScreenChangeNotifyMask | RRCrtcChangeNotifyMask |
+       RROutputChangeNotifyMask | RROutputPropertyNotifyMask;
+
+   if (mVersion < RANDR_1_2)
+   {
+       XRRScreenConfiguration *screenConfig = NULL;
+       screenConfig = XRRGetScreenInfo(mXDisplay, DefaultRootWindow(mXDisplay));
+
+      if (screenConfig)
+      {
+         XRRScreenSize *screenSizes;
+         int nSizes = 0;
+         Rotation currentRotation;
+         int currentSizeID = XRRConfigCurrentConfiguration(screenConfig, &currentRotation);
+         screenSizes = XRRConfigSizes(screenConfig, &nSizes);
+
+         mCurrentMode.first.first = screenSizes[currentSizeID].width;
+         mCurrentMode.first.second = screenSizes[currentSizeID].height;
+         mCurrentMode.second = XRRConfigCurrentRate(screenConfig);
+
+         mOriginalMode = mCurrentMode;
+
+         for(int sizeID = 0; sizeID < nSizes; sizeID++)
+         {
+               short *rates;
+               int nRates = 0;
+
+               rates = XRRConfigRates(screenConfig, sizeID, &nRates);
+
+               for (int rate = 0; rate < nRates; rate++)
+               {
+                  VideoMode mode;
+                  mode.first.first = screenSizes[sizeID].width;
+                  mode.first.second = screenSizes[sizeID].height;
+                  mode.second = rates[rate];
+
+                  mVideoModes.push_back(mode);
+               }
+           }
+
+         XRRFreeScreenConfigInfo(screenConfig);
+       }
+      else
+      {
+         throw std::runtime_error("Failed to get X screen config");
+      }
+   }
+   else// if (mVersion >= RANDR_1_2)
+   {
+      XRRScreenResources *mScreenResources = XRRGetScreenResources(mXDisplay, DefaultRootWindow(mXDisplay));
+
+       for (int crtID = 0; crtID < mScreenResources->ncrtc; crtID++)
+       {
+           XRRCrtcInfo *ci = XRRGetCrtcInfo(mXDisplay, mScreenResources, mScreenResources->crtcs[crtID]);
+
+           if (!ci)
+           {
+              break;
+           }
+
+           if (ci->noutput==0)
+           {
+              break;
+           }
+
+           //printf("Current Mode :%lu\nScreen x: %i, y: %i, width: %i, height: %i \nNum Outputs: %i \nNum Possibles: %i Rotation :%i Rotations :%i\n",
+           //   ci->mode,
+           //    ci->x,  ci->y,
+           //    ci->width, ci->height,
+           //    ci->noutput, ci->npossible,
+           //    ci->rotation, ci->rotations);
+
+           mCurrentMode.first.first = ci->width;
+           mCurrentMode.first.second = ci->height;
+
+           double active_rate = 0;
+            for (int i = 0; i < mScreenResources->nmode; ++i)
+            {
+               XRRModeInfo mode_info = mScreenResources->modes[i];
+
+               if (mode_info.id == ci->mode)
+               {
+                  active_rate = (double)mode_info.dotClock / ((double)mode_info.hTotal * (double)mode_info.vTotal);
+                  break;
+               }
+            }
+
+           mCurrentMode.second = active_rate;
+
+           mOriginalMode = mCurrentMode;
+
+           for (int outputID=0;outputID<ci->noutput;outputID++)
+           {
+               std::string s;
+               XRROutputInfo *outputInfo =
+                   XRRGetOutputInfo (mXDisplay, mScreenResources, ci->outputs[outputID]);
+               s.assign(outputInfo->name, outputInfo->nameLen + 1);
+
+               XRRModeInfo* modeInfo=0;
+
+               for (int modeID = 0; modeID < outputInfo->nmode; modeID++)
+               {
+                   for (int m = 0;  mScreenResources->nmode;m++)
+                   {
+                       modeInfo = &mScreenResources->modes[m];
+
+                       if (modeInfo->id == outputInfo->modes[modeID])
+                       {
+                           break;
+                       }
+                   }
+
+                   if (modeInfo)
+                   {
+                       unsigned int vTotal = modeInfo->vTotal;
+                       vTotal = (modeInfo->modeFlags & RR_DoubleScan) ? vTotal*2:vTotal;
+                       vTotal = (modeInfo->modeFlags & RR_Interlace)  ? vTotal/2:vTotal;
+
+                       double rate = ((double) modeInfo->dotClock /((double) modeInfo->hTotal * (double)vTotal));
+
+                       //printf("Mode id: %lu name: %9s width: %4i height: %4i rate: %4.2f\n",
+                       //        //"x",//outputInfo->npreferred>0?"*":" ",
+                       //        modeInfo->id,
+                       //       modeInfo->name,
+                       //      modeInfo->width,
+                       //        modeInfo->height,
+                       //       rate);
+
+                       std::string s;
+                       s.assign(modeInfo->name, modeInfo->nameLength);
+
+                       //
+                       VideoMode mode;
+                       mode.first.first = modeInfo->width;
+                       mode.first.second = modeInfo->height;
+                       mode.second = rate;
+
+                       mVideoModes.push_back(mode);
+                   }
+               }
+
+               XRRFreeOutputInfo(outputInfo);
+           }
+
+           if (ci)
+           {
+              XRRFreeCrtcInfo(ci);
+           }
+       }
+
+       XRRFreeScreenResources(mScreenResources);
+   }
+}
+
+// Original
+/*void
+GLXGLSupport::
+GetDisplayModes ()
+{
+   int dummy;
+
+   if (XQueryExtension(mXDisplay, "RANDR", &dummy, &dummy, &dummy))
+   {
+       XRRScreenConfiguration *screenConfig;
+
+       screenConfig = XRRGetScreenInfo(mXDisplay, DefaultRootWindow(mXDisplay));
+
+       if (screenConfig)
+       {
+           XRRScreenSize *screenSizes;
+           int nSizes = 0;
+           Rotation currentRotation;
+           int currentSizeID = XRRConfigCurrentConfiguration(screenConfig, &currentRotation);
+
+           screenSizes = XRRConfigSizes(screenConfig, &nSizes);
+
+           mCurrentMode.first.first = screenSizes[currentSizeID].width;
+           mCurrentMode.first.second = screenSizes[currentSizeID].height;
+           mCurrentMode.second = XRRConfigCurrentRate(screenConfig);
+
+           mOriginalMode = mCurrentMode;
+
+           for(int sizeID = 0; sizeID < nSizes; sizeID++)
+           {
+               short *rates;
+               int nRates = 0;
+
+               rates = XRRConfigRates(screenConfig, sizeID, &nRates);
+
+               for (int rate = 0; rate < nRates; rate++)
+               {
+                   VideoMode mode;
+
+                   mode.first.first = screenSizes[sizeID].width;
+                   mode.first.second = screenSizes[sizeID].height;
+                   mode.second = rates[rate];
+
+                   mVideoModes.push_back(mode);
+               }
+           }
+           XRRFreeScreenConfigInfo(screenConfig);
+       }
+   }
+   else
+   {
+       mCurrentMode.first.first = DisplayWidth(mXDisplay, DefaultScreen(mXDisplay));
+       mCurrentMode.first.second = DisplayHeight(mXDisplay, DefaultScreen(mXDisplay));
+       mCurrentMode.second = 0;
+
+       mOriginalMode = mCurrentMode;
+
+       mVideoModes.push_back(mCurrentMode);
+   }
+}*/
+//////////////////////////////////////////////////////////////////////
+
+///
     //-------------------------------------------------------------------------------------------------//
     template<class C> void remove_duplicates(C& c)
     {
@@ -71,58 +329,10 @@ namespace Ogre
 
         int dummy;
 
-        if (XQueryExtension(mXDisplay, "RANDR", &dummy, &dummy, &dummy))
-        {
-            XRRScreenConfiguration *screenConfig;
-
-            screenConfig = XRRGetScreenInfo(mXDisplay, DefaultRootWindow(mXDisplay));
-
-            if (screenConfig)
-            {
-                XRRScreenSize *screenSizes;
-                int nSizes = 0;
-                Rotation currentRotation;
-                int currentSizeID = XRRConfigCurrentConfiguration(screenConfig, &currentRotation);
-
-                screenSizes = XRRConfigSizes(screenConfig, &nSizes);
-
-                mCurrentMode.first.first = screenSizes[currentSizeID].width;
-                mCurrentMode.first.second = screenSizes[currentSizeID].height;
-                mCurrentMode.second = XRRConfigCurrentRate(screenConfig);
-
-                mOriginalMode = mCurrentMode;
-
-                for(int sizeID = 0; sizeID < nSizes; sizeID++)
-                {
-                    short *rates;
-                    int nRates = 0;
-
-                    rates = XRRConfigRates(screenConfig, sizeID, &nRates);
-
-                    for (int rate = 0; rate < nRates; rate++)
-                    {
-                        VideoMode mode;
-
-                        mode.first.first = screenSizes[sizeID].width;
-                        mode.first.second = screenSizes[sizeID].height;
-                        mode.second = rates[rate];
-
-                        mVideoModes.push_back(mode);
-                    }
-                }
-                XRRFreeScreenConfigInfo(screenConfig);
-            }
-        }
-        else
-        {
-            mCurrentMode.first.first = DisplayWidth(mXDisplay, DefaultScreen(mXDisplay));
-            mCurrentMode.first.second = DisplayHeight(mXDisplay, DefaultScreen(mXDisplay));
-            mCurrentMode.second = 0;
-
-            mOriginalMode = mCurrentMode;
-
-            mVideoModes.push_back(mCurrentMode);
-        }
+        //////////////////////////////////////////////////////////////////////
+        /// Champion custom
+        GetDisplayModes () ;
+        //////////////////////////////////////////////////////////////////////
 
         GLXFBConfig *fbConfigs;
         int config, nConfigs = 0;
@@ -169,7 +379,7 @@ namespace Ogre
         ConfigOption optRTTMode;
         ConfigOption optSRGB;
 #if OGRE_NO_QUAD_BUFFER_STEREO == 0
-		ConfigOption optStereoMode;
+      ConfigOption optStereoMode;
 #endif
 
         optFullScreen.name = "Full Screen";
@@ -243,13 +453,13 @@ namespace Ogre
         optSRGB.currentValue = optSRGB.possibleValues[0];
 
 #if OGRE_NO_QUAD_BUFFER_STEREO == 0
-		optStereoMode.name = "Stereo Mode";
-		optStereoMode.possibleValues.push_back(StringConverter::toString(SMT_NONE));
-		optStereoMode.possibleValues.push_back(StringConverter::toString(SMT_FRAME_SEQUENTIAL));
-		optStereoMode.currentValue = optStereoMode.possibleValues[0];
-		optStereoMode.immutable = false;
+      optStereoMode.name = "Stereo Mode";
+      optStereoMode.possibleValues.push_back(StringConverter::toString(SMT_NONE));
+      optStereoMode.possibleValues.push_back(StringConverter::toString(SMT_FRAME_SEQUENTIAL));
+      optStereoMode.currentValue = optStereoMode.possibleValues[0];
+      optStereoMode.immutable = false;
 
-		mOptions[optStereoMode.name] = optStereoMode;
+      mOptions[optStereoMode.name] = optStereoMode;
 #endif
 
         mOptions[optFullScreen.name] = optFullScreen;
@@ -381,10 +591,10 @@ namespace Ogre
                 miscParams["gamma"] = opt->second.currentValue;
 
 #if OGRE_NO_QUAD_BUFFER_STEREO == 0
-			opt = mOptions.find("Stereo Mode");
-			if (opt == mOptions.end())
-				OGRE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Can't find stereo enabled options!", "GLXGLSupport::createWindow");
-			miscParams["stereoMode"] = opt->second.currentValue;			
+         opt = mOptions.find("Stereo Mode");
+         if (opt == mOptions.end())
+            OGRE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Can't find stereo enabled options!", "GLXGLSupport::createWindow");
+         miscParams["stereoMode"] = opt->second.currentValue;
 #endif
 
             window = renderSystem->_createRenderWindow(windowTitle, w, h, fullscreen, &miscParams);
@@ -913,6 +1123,21 @@ namespace Ogre
     {
         int size = 0;
         int newSize = -1;
+
+        /////////////////////////////////////////////
+        if ( frequency == -1 ) // Fullscreen, but we don't know the frequency
+        {
+           frequency = 0 ;
+
+           for(auto &mode : mVideoModes )
+           {
+              if ( mode.second > frequency )
+              {
+                 frequency = mode.second ;
+              }
+           }
+        }
+        /////////////////////////////////////////////
 
         VideoModes::iterator mode;
         VideoModes::iterator end = mVideoModes.end();

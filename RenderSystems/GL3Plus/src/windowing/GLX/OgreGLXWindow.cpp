@@ -192,14 +192,14 @@ namespace Ogre
 
             if ((opt = miscParams->find("externalGLControl")) != end)
                 mIsExternalGLControl = StringConverter::parseBool(opt->second);
-            
+
 #if OGRE_NO_QUAD_BUFFER_STEREO == 0
-			if ((opt = miscParams->find("stereoMode")) != end)
-			{
-				StereoModeType stereoMode = StringConverter::parseStereoMode(opt->second);
-				if (SMT_NONE != stereoMode)
-					mStereoEnabled = true;
-			}
+         if ((opt = miscParams->find("stereoMode")) != end)
+         {
+            StereoModeType stereoMode = StringConverter::parseStereoMode(opt->second);
+            if (SMT_NONE != stereoMode)
+               mStereoEnabled = true;
+         }
 #endif
 
             if((opt = miscParams->find("parentWindowHandle")) != end)
@@ -303,7 +303,7 @@ namespace Ogre
                 GLX_BLUE_SIZE,    1,
                 GLX_GREEN_SIZE,  1,
 #if OGRE_NO_QUAD_BUFFER_STEREO == 0
-				GLX_STEREO, mStereoEnabled ? True : False,
+            GLX_STEREO, mStereoEnabled ? True : False,
 #endif
                 GLX_FRAMEBUFFER_SRGB_CAPABLE_EXT, gamma,
                 None
@@ -531,6 +531,7 @@ namespace Ogre
         }
         else if (fullscreen)
         {
+           frequency = -1 ; // Indicate fullscreen, but we don't know the frequency
             mGLSupport->switchMode(width, height, frequency);
         }
         else
