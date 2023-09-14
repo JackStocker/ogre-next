@@ -58,7 +58,7 @@ void WindowEventUtilities::messagePump()
     RenderWindowList::iterator end = _msWindows.end();
 
     Display* xDisplay = 0; // same for all windows
-    
+
     for (; win != end; win++)
     {
         XID xid;
@@ -85,10 +85,10 @@ void WindowEventUtilities::messagePump()
     EventRef event = NULL;
     EventTargetRef targetWindow;
     targetWindow = GetEventDispatcherTarget();
-    
+
     // If we are unable to get the target then we no longer care about events.
     if( !targetWindow ) return;
-    
+
     // Grab the next event, process it if it is a window event
     while( ReceiveNextEvent( 0, NULL, kEventDurationNoWait, true, &event ) == noErr )
     {
@@ -299,7 +299,7 @@ void GLXProc( Ogre::RenderWindow *win, const XEvent &event )
         break;
     }
     case ConfigureNotify:
-    {    
+    {
         // This could be slightly more efficient if windowMovedOrResized took arguments:
         unsigned int oldWidth, oldHeight, oldDepth;
         int oldLeft, oldTop;
@@ -324,7 +324,18 @@ void GLXProc( Ogre::RenderWindow *win, const XEvent &event )
         break;
     }
     case FocusIn:     // Gained keyboard focus
+       win->setActive( true );
+
+       for(index = start ; index != end; ++index)
+           (index->second)->windowFocusChange(win);
+
+       break;
     case FocusOut:    // Lost keyboard focus
+       if( win->isDeactivatedOnFocusChange() )
+       {
+           win->setActive( false );
+       }
+
         for(index = start ; index != end; ++index)
             (index->second)->windowFocusChange(win);
         break;
@@ -373,12 +384,12 @@ OSStatus WindowEventUtilities::_CarbonWindowHandler(EventHandlerCallRef nextHand
     // This ensures that our user data is our WindowRef
     RenderWindow* curWindow = (RenderWindow*)wnd;
     if(!curWindow) return eventNotHandledErr;
-    
+
     //Iterator of all listeners registered to this RenderWindow
     WindowEventListeners::iterator index,
         start = _msListeners.lower_bound(curWindow),
         end = _msListeners.upper_bound(curWindow);
-    
+
     // We only get called if a window event happens
     UInt32 eventKind = GetEventKind( event );
 
@@ -412,7 +423,7 @@ OSStatus WindowEventUtilities::_CarbonWindowHandler(EventHandlerCallRef nextHand
             curWindow->setVisible( false );
             for( ; start != end; ++start )
                 (start->second)->windowFocusChange(curWindow);
-            break;            
+            break;
         case kEventWindowDragCompleted:
             curWindow->windowMovedOrResized();
             for( ; start != end; ++start )
@@ -446,7 +457,7 @@ OSStatus WindowEventUtilities::_CarbonWindowHandler(EventHandlerCallRef nextHand
             status = eventNotHandledErr;
             break;
     }
-    
+
     return status;
 }
 }
