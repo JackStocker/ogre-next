@@ -49,7 +49,8 @@ namespace Ogre
         SHADOWMAP_UNIFORM,          //Default
         SHADOWMAP_PLANEOPTIMAL,
         SHADOWMAP_FOCUSED,
-        SHADOWMAP_PSSM
+        SHADOWMAP_PSSM,
+        SHADOWMAP_CHAMPION
     };
 
     /// Local texture definition
@@ -197,6 +198,24 @@ namespace Ogre
             or if it's substantially easier to do so here.
         */
         virtual void _validateAndFinish(void);
+
+        //////////////////////////
+        // Custom Champion
+        void
+        SetCustom ( ShadowCameraSetupPtr shadow_camera ) const
+        {
+            CustomShadowCamera = shadow_camera ;
+        }
+
+        ShadowCameraSetupPtr
+        GetCustom () const
+        {
+            return CustomShadowCamera ;
+        }
+
+    private :
+        mutable ShadowCameraSetupPtr CustomShadowCamera ;
+        //////////////////////////
     };
 
     /** @} */

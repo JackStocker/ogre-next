@@ -193,6 +193,11 @@ namespace Ogre
                         setup->setSplitPadding( itor->splitPadding );
                     }
                     break;
+                case SHADOWMAP_CHAMPION:
+                    {
+                        shadowMapCamera.shadowCameraSetup = definition->GetCustom () ;
+                    }
+                    break;
                 default:
                     OGRE_EXCEPT( Exception::ERR_NOT_IMPLEMENTED,
                                 "Shadow Map technique not implemented or not recognized.",
@@ -1045,7 +1050,7 @@ namespace Ogre
         supportedLightTypes |= 1u << lightType;
     }
     //-----------------------------------------------------------------------------------
-    void ShadowNodeHelper::createShadowNodeWithSettings( CompositorManager2 *compositorManager,
+    CompositorShadowNodeDef* ShadowNodeHelper::createShadowNodeWithSettings( CompositorManager2 *compositorManager,
                                                          const RenderSystemCapabilities *capabilities,
                                                          const String &shadowNodeName,
                                                          const ShadowNodeHelper::
@@ -1447,5 +1452,7 @@ namespace Ogre
                 }
             }
         }
+
+        return shadowNodeDef ;
     }
 }

@@ -401,7 +401,7 @@ namespace Ogre
         @param splitFade
             PSSM split fade. Ignored if not using PSSM.
         */
-        static void createShadowNodeWithSettings( CompositorManager2 *compositorManager,
+        static CompositorShadowNodeDef* createShadowNodeWithSettings( CompositorManager2 *compositorManager,
                                                   const RenderSystemCapabilities *capabilities,
                                                   const String &shadowNodeName,
                                                   const ShadowNodeHelper::
