@@ -346,7 +346,7 @@ namespace Ogre {
 
             if (mIsFullScreen)
             {               
-                dwStyleEx |= WS_EX_TOPMOST;
+                //dwStyleEx |= WS_EX_TOPMOST;
                 mTop = monitorInfoEx.rcMonitor.top;
                 mLeft = monitorInfoEx.rcMonitor.left;                                           
             }
