@@ -219,6 +219,37 @@ namespace Ogre
 
             ++itTrack;
         }
+
+        //////////////////////////////////////////
+        // Custom Champion
+
+        // We need access to the keyframes that make up the models animation so we snap between them (there is no way of disabling frame interpolation).
+        // So here we perform a delicious hack to access the protected member data...
+        class InternalAnimation : public v1::Animation
+        {
+        public :
+            void
+            BuildKeyFrameList () const
+            {
+               if ( mKeyFrameTimesDirty )
+               {
+                  buildKeyFrameTimeList () ;
+               }
+            }
+
+            const v1::Animation::KeyFrameTimeList &
+            GetKeyFrameTimeList () const
+            {
+               return mKeyFrameTimes ;
+            }
+        } ;
+
+        // Ensure the keyframe list is populated
+        static_cast <const InternalAnimation*> ( animation )->BuildKeyFrameList () ;
+
+
+        mKeyFrameTimes = static_cast <const InternalAnimation*> ( animation )->GetKeyFrameTimeList () ;
+        //////////////////////////////////////////
     }
     //-----------------------------------------------------------------------------------
     void SkeletonAnimationDef::getInterpolatedUnnormalizedKeyFrame( v1::OldNodeAnimationTrack *oldTrack,

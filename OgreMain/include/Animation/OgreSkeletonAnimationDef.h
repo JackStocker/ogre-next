@@ -84,6 +84,13 @@ namespace Ogre
         void allocateCacheFriendlyKeyframes( const TimestampsPerBlock &timestampsByBlock,
                                              Real frameRate );
 
+        //////////////////////////////////////////
+        // Custom Champion
+        // List of unique key frame seconds so that we can jump to specific key frames
+        typedef vector<Real>::type KeyFrameTimeList ;
+        KeyFrameTimeList mKeyFrameTimes ;
+        //////////////////////////////////////////
+
     public:
         SkeletonAnimationDef();
         ~SkeletonAnimationDef();
@@ -98,6 +105,15 @@ namespace Ogre
         /// Mostly for debugging purposes. (also easy example to show how to
         /// enumerate all the tracks and get the bones back from its block index)
         void _dumpCsvTracks( String &outText ) const;
+
+        //////////////////////////////////////////
+        // Custom Champion
+        const KeyFrameTimeList &
+        GetKeyFrameTimes () const
+        {
+            return mKeyFrameTimes ;
+        }
+        //////////////////////////////////////////
     };
 
     typedef vector<SkeletonAnimationDef>::type SkeletonAnimationDefVec;

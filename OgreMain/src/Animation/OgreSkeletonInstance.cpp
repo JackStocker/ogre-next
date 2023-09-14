@@ -358,7 +358,7 @@ namespace Ogre
     bool SkeletonInstance::hasBone( IdString boneName ) const
     {
         return mDefinition->mBoneIndexByName.find( boneName ) != mDefinition->mBoneIndexByName.end();
-    }      
+    }
     //-----------------------------------------------------------------------------------
     Bone* SkeletonInstance::getBone( IdString boneName )
     {
@@ -410,7 +410,7 @@ namespace Ogre
         OGRE_EXCEPT( Exception::ERR_ITEM_NOT_FOUND,
                      "Can't find animation '" + name.getFriendlyText() + "'",
                      "SkeletonInstance::getAnimation" );
-        return 0;    
+        return 0;
     }
     //-----------------------------------------------------------------------------------
     void SkeletonInstance::addAnimationsFromSkeleton( const String &skelName, const String &groupName )
@@ -572,17 +572,17 @@ namespace Ogre
                         mBoneStartTransforms[0].mOwner + mBoneStartTransforms[0].mIndex );
     }
     //-----------------------------------------------------------------------------------
-    void SkeletonInstance::_incrementRefCount(void) 
+    void SkeletonInstance::_incrementRefCount(void)
     {
         mRefCount++;
     }
     //-----------------------------------------------------------------------------------
-    void SkeletonInstance::_decrementRefCount(void) 
+    void SkeletonInstance::_decrementRefCount(void)
     {
         mRefCount--;
     }
     //-----------------------------------------------------------------------------------
-    uint16 SkeletonInstance::_getRefCount(void) const 
+    uint16 SkeletonInstance::_getRefCount(void) const
     {
         return mRefCount;
     }
