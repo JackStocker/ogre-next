@@ -51,14 +51,14 @@ namespace Ogre
         /** Completely clear the contents of the object.
         @remarks
             Clearing the contents of this object and rebuilding from scratch
-            is not the optimal way to manage dynamic vertex data, since the 
+            is not the optimal way to manage dynamic vertex data, since the
             buffers are recreated. If you want to keep the same structure but
-            update the content within that structure, use beginUpdate() instead 
-            of clear() begin(). However if you do want to modify the structure 
+            update the content within that structure, use beginUpdate() instead
+            of clear() begin(). However if you do want to modify the structure
             from time to time you can do so by clearing and re-specifying the data.
         */
         virtual_l1 void clear(void);
-        
+
         /** Estimate the number of vertices ahead of time.
         @remarks
             Calling this helps to avoid memory reallocation when you first define
@@ -80,7 +80,7 @@ namespace Ogre
             rendering operation (triangles, points or lines for example).
         @param datablockName The name of the datablock to render this part of the
             object with.
-        @param opType The type of operation to use to render. 
+        @param opType The type of operation to use to render.
         */
         virtual_l1 void begin(const String& datablockName,
                            OperationType opType = OT_TRIANGLE_LIST);
@@ -89,7 +89,7 @@ namespace Ogre
         @remarks
             Using this method, you can update an existing section of the object
             efficiently. You do not have the option of changing the operation type
-            obviously, since it must match the one that was used before. 
+            obviously, since it must match the one that was used before.
         @note Changing size of the sections is not supported, you are expected to
             supply the same amount of data with the same layout when updating.
             If you want to change the data layout, call clear() and create
@@ -98,10 +98,10 @@ namespace Ogre
             call to begin() would have created section 0, the second section 1, etc.
         */
         virtual_l1 void beginUpdate(size_t sectionIndex);
-        /** Add a vertex position, starting a new vertex at the same time. 
+        /** Add a vertex position, starting a new vertex at the same time.
         @remarks A vertex position is slightly special among the other vertex data
             methods like normal() and textureCoord(), since calling it indicates
-            the start of a new vertex. All other vertex data methods you call 
+            the start of a new vertex. All other vertex data methods you call
             after this are assumed to be adding more information (like normals or
             texture coordinates) to the last vertex started with position().
         */
@@ -111,7 +111,7 @@ namespace Ogre
 
         /** Add a vertex normal to the current vertex.
         @remarks
-            Vertex normals are most often used for dynamic lighting, and 
+            Vertex normals are most often used for dynamic lighting, and
             their components should be normalised.
         */
         virtual_l1 void normal(const Vector3& norm);
@@ -120,8 +120,8 @@ namespace Ogre
 
         /** Add a vertex tangent to the current vertex.
         @remarks
-            Vertex tangents are most often used for dynamic lighting, and 
-            their components should be normalised. 
+            Vertex tangents are most often used for dynamic lighting, and
+            their components should be normalised.
             Also, using tangent() you enable VES_TANGENT vertex semantic, which is not
             supported on old non-SM2 cards.
         */
@@ -134,7 +134,7 @@ namespace Ogre
             You can call this method multiple times between position() calls
             to add multiple texture coordinates to a vertex. Each one can have
             between 1 and 3 dimensions, depending on your needs, although 2 is
-            most common. There are several versions of this method for the 
+            most common. There are several versions of this method for the
             variations in number of dimensions.
         */
         virtual_l1 void textureCoord(Real u);
@@ -169,13 +169,13 @@ namespace Ogre
 
         /** Add a vertex index to construct faces / lines / points.
         @remarks
-            You will have to call this 3 times for each face for a triangle list, 
+            You will have to call this 3 times for each face for a triangle list,
             or use the alternative 3-parameter version. Other operation types
             require different numbers of indexes, @see OperationType.
         @note
             32-bit indexes are not supported on all cards and will only be used
             when required, if an index is > 65535.
-        @param idx A vertex index from 0 to 4294967295. 
+        @param idx A vertex index from 0 to 4294967295.
         */
         virtual_l1 void index(uint32 idx);
 
@@ -190,7 +190,7 @@ namespace Ogre
         virtual_l1 void line(uint32 i1, uint32 i2);
 
         /** Add a set of 3 vertex indices to construct a triangle; this is a
-            shortcut to calling index() 3 times. It is only valid for triangle 
+            shortcut to calling index() 3 times. It is only valid for triangle
             lists.
         @note
             32-bit indexes are not supported on all cards and will only be used
@@ -199,13 +199,13 @@ namespace Ogre
         */
         virtual_l1 void triangle(uint32 i1, uint32 i2, uint32 i3);
 
-        /** Add a set of 4 vertex indices to construct a quad (out of 2 
-            triangles); this is a shortcut to calling index() 6 times, 
+        /** Add a set of 4 vertex indices to construct a quad (out of 2
+            triangles); this is a shortcut to calling index() 6 times,
             or triangle() twice. It's only valid for triangle list operations.
         @note
             32-bit indexes are not supported on all cards and will only be used
             when required, if an index is > 65535.
-        @param i1, i2, i3, i4 4 vertex indices from 0 to 4294967295 defining a quad. 
+        @param i1, i2, i3, i4 4 vertex indices from 0 to 4294967295 defining a quad.
         */
         virtual_l1 void quad(uint32 i1, uint32 i2, uint32 i3, uint32 i4);
 
@@ -214,8 +214,8 @@ namespace Ogre
 
         /// Get the number of indices in the section currently being defined (returns 0 if no section is in progress).
         virtual_l1 size_t getCurrentIndexCount() const;
-        
-        /** Finish defining the object and compile the final renderable version. 
+
+        /** Finish defining the object and compile the final renderable version.
         @note
             Will return a pointer to the finished section or NULL if the section was discarded (i.e. has zero vertices/indices).
         */
@@ -287,7 +287,7 @@ namespace Ogre
 
             ManualObjectSection(ManualObject* parent, const String& datablockName, OperationType opType);
             virtual ~ManualObjectSection();
-            
+
             // Renderable overrides
             /** @copydoc Renderable::getRenderOperation. */
             virtual void getRenderOperation(v1::RenderOperation& op, bool casterPass) OGRE_OVERRIDE;
@@ -309,8 +309,8 @@ namespace Ogre
         };
 
         typedef vector<ManualObjectSection*>::type SectionList;
-        
-        
+
+
     protected:
         /// List of subsections
         SectionList mSectionList;
@@ -366,7 +366,7 @@ namespace Ogre
         static String FACTORY_TYPE_NAME;
 
         const String& getType(void) const;
-        void destroyInstance( MovableObject* obj);  
+        void destroyInstance( MovableObject* obj);
 
     };
     /** @} */

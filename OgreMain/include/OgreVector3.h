@@ -58,9 +58,7 @@ namespace Ogre
             @note
                 It does <b>NOT</b> initialize the vector for efficiency.
         */
-        inline Vector3()
-        {
-        }
+       inline Vector3 () = default ;
 
         inline Vector3( const Real fX, const Real fY, const Real fZ )
             : x( fX ), y( fY ), z( fZ )
@@ -137,14 +135,7 @@ namespace Ogre
             @param
                 rkVector The other vector
         */
-        inline Vector3& operator = ( const Vector3& rkVector )
-        {
-            x = rkVector.x;
-            y = rkVector.y;
-            z = rkVector.z;
-
-            return *this;
-        }
+        inline Vector3& operator = ( const Vector3& rkVector ) = default ;
 
         inline Vector3& operator = ( const Real fScaler )
         {

@@ -595,7 +595,7 @@ namespace Ogre {
     {
         if (!mCurrentSection)
             return 0;
-        
+
         return mVertices;
     }
     //-----------------------------------------------------------------------------
