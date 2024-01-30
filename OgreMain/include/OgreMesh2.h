@@ -399,6 +399,14 @@ namespace Ogre {
 
         const LodValueArray* _getLodValueArray(void) const                      { return &mLodValues; }
 
+        //////////////////////////////////////////////////////
+        void
+        SetLodValueArray ( LodValueArray values )
+        {
+           return mLodValues = values ;
+        }
+        //////////////////////////////////////////////////////
+
         /** Imports a v1 mesh to this mesh, with optional optimization conversions.
             This mesh must be in unloaded state.
         @remarks

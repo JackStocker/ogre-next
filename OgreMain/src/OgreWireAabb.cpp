@@ -31,7 +31,7 @@ namespace Ogre
         mRenderables.push_back( this );
 
         this->setDatablock( Root::getSingleton().getHlmsManager()->
-                            getHlms( HLMS_UNLIT )->getDefaultDatablock() );
+                            getHlms( HLMS_USER0 )->getDefaultDatablock() );
     }
     //-----------------------------------------------------------------------------------
     WireAabb::~WireAabb()
