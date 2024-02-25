@@ -543,6 +543,39 @@ namespace Ogre {
         }
     }
     //---------------------------------------------------------------------
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    VertexArrayObject* SubMesh::createVAOFromV1 ( v1::SubMesh *subMesh, bool halfPos, bool halfTexCoords, bool qTangents, size_t vaoPassIdx )
+    {
+       // Function added which returns a new VAO from the vertex and index buffers of a given v1 sub-mesh (repeats most of importBuffersFromV1).
+
+        VertexElement2Vec vertexElements;
+        char *data = _arrangeEfficient( subMesh, halfPos, halfTexCoords, qTangents, &vertexElements,
+                                        vaoPassIdx );
+
+        //Wrap the ptrs around these, because the VaoManager's call
+        //can throw thus causing a leak if we don't free them.
+        FreeOnDestructor dataPtrContainer( data );
+
+        VaoManager *vaoManager = mParent->mVaoManager;
+        VertexBufferPackedVec vertexBuffers;
+
+        //Create the vertex buffer
+        bool keepAsShadow = mParent->mVertexBufferShadowBuffer;
+        VertexBufferPacked *vertexBuffer = vaoManager->createVertexBuffer( vertexElements,
+                                                        subMesh->vertexData[vaoPassIdx]->vertexCount,
+                                                        mParent->mVertexBufferDefaultType,
+                                                        data, keepAsShadow );
+        vertexBuffers.push_back( vertexBuffer );
+
+        if( keepAsShadow ) //Don't free the pointer ourselves
+            dataPtrContainer.ptr = 0;
+
+        IndexBufferPacked *indexBuffer = importFromV1( subMesh->indexData[vaoPassIdx] );
+
+         return vaoManager->createVertexArrayObject( vertexBuffers, indexBuffer, subMesh->operationType );
+    }
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //---------------------------------------------------------------------
     void SubMesh::importBuffersFromV1( v1::SubMesh *subMesh, bool halfPos, bool halfTexCoords,
                                        bool qTangents, bool halfPose, size_t vaoPassIdx )
     {
@@ -577,19 +610,25 @@ namespace Ogre {
         }
 
         //Now deal with the automatic LODs
-        v1::SubMesh::LODFaceList::const_iterator itor = subMesh->mLodFaceList[vaoPassIdx].begin();
-        v1::SubMesh::LODFaceList::const_iterator end  = subMesh->mLodFaceList[vaoPassIdx].end();
-
-        while( itor != end )
+        ///////////////////////////////////////////////////////////////////
+        // We don't want to do this when using manual LODs as the mLodFaceList will have an empty value that we don't want, and Mesh::importV1 will populate the LOD VAOs for us
+        if ( ! subMesh->parent->hasManualLodLevel () )
         {
-            IndexBufferPacked *lodIndexBuffer = importFromV1( *itor );
+           v1::SubMesh::LODFaceList::const_iterator itor = subMesh->mLodFaceList[vaoPassIdx].begin();
+           v1::SubMesh::LODFaceList::const_iterator end  = subMesh->mLodFaceList[vaoPassIdx].end();
 
-            VertexArrayObject *vao = vaoManager->createVertexArrayObject( vertexBuffers, lodIndexBuffer,
-                                                                          subMesh->operationType );
+           while( itor != end )
+           {
+               IndexBufferPacked *lodIndexBuffer = importFromV1( *itor );
 
-            mVao[vaoPassIdx].push_back( vao );
-            ++itor;
+               VertexArrayObject *vao = vaoManager->createVertexArrayObject( vertexBuffers, lodIndexBuffer,
+                                                                             subMesh->operationType );
+
+               mVao[vaoPassIdx].push_back( vao );
+               ++itor;
+           }
         }
+        ///////////////////////////////////////////////////////////////////
         
         importPosesFromV1( subMesh, vertexBuffer, halfPose );
     }

@@ -98,8 +98,11 @@ namespace Ogre {
 
         /// Minimum pixel size to still render
         Real mMinPixelSize;
+
+        ////////////////////////////////
         /// User objects binding.
-        UserObjectBindings mUserObjectBindings;
+        //UserObjectBindings mUserObjectBindings;
+        ////////////////////////////////
 
         /// MovableObject listener - only one allowed (no list) for size & performance reasons.
         Listener* mListener;
@@ -374,17 +377,21 @@ namespace Ogre {
         */
         Real getRenderingMinPixelSize() const                               { return mMinPixelSize; }
 
+        ////////////////////////////////////////////
         /** Return an instance of user objects binding associated with this class.
             You can use it to associate one or more custom objects with this class instance.
         @see UserObjectBindings::setUserAny.        
         */
-        UserObjectBindings& getUserObjectBindings() { return mUserObjectBindings; }
+        //UserObjectBindings& getUserObjectBindings() { return mUserObjectBindings; }
 
         /** Return an instance of user objects binding associated with this class.
         You can use it to associate one or more custom objects with this class instance.
         @see UserObjectBindings::setUserAny.        
         */
-        const UserObjectBindings& getUserObjectBindings() const { return mUserObjectBindings; }
+        //const UserObjectBindings& getUserObjectBindings() const { return mUserObjectBindings; }
+
+        std::size_t ObjectDataIndex = std::numeric_limits <std::size_t>::max () ;
+        ////////////////////////////////////////////
 
         /** Sets the render queue group this entity will be rendered through.
         @remarks

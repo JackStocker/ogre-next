@@ -64,6 +64,17 @@ namespace Ogre {
         return mAttributes->mKeylessAny;
     }
 
+    /////////////////////////////////////////
+    Any& UserObjectBindings::getUserAny ( void )
+    {
+       // Allocate attributes on demand.
+       if ( mAttributes == NULL )
+          mAttributes = OGRE_NEW UserObjectBindings::Attributes;
+
+       return mAttributes->mKeylessAny;
+    }
+    /////////////////////////////////////////
+
     //-----------------------------------------------------------------------
     void UserObjectBindings::setUserAny(const String& key, const Any& anything)
     {

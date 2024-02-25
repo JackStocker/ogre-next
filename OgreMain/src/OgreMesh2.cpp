@@ -52,6 +52,10 @@ THE SOFTWARE.
 
 #include "OgreProfiler.h"
 
+
+#include "OgreSubMesh.h"
+#include "Vao/OgreVaoManager.h"
+
 namespace Ogre {
     bool Mesh::msOptimizeForShadowMapping = false;
 
@@ -360,7 +364,7 @@ namespace Ogre {
     //---------------------------------------------------------------------
     ushort Mesh::getNumLodLevels(void) const
     {
-        return mNumLods;
+        return static_cast<uint16>( mLodValues.size() );
     }
     //---------------------------------------------------------------------
     void Mesh::_setLodInfo(unsigned short numLevels)
@@ -553,15 +557,37 @@ namespace Ogre {
         if( !v1Skeleton.isNull() )
             mSkeleton = SkeletonManager::getSingleton().getSkeletonDef( v1Skeleton.get() );
 
-        //So far we only import manual LOD levels. If the mesh had manual LOD levels,
-        //mLodValues will have more entries than Vaos, causing an out of bounds exception.
-        //Don't use LOD if the imported mesh had manual levels.
-        //Note: Mesh2 supports LOD levels that have their own vertex and index buffers,
-        //so it should be possible to import them as well.
         if( !mesh->hasManualLodLevel() )
+        {
+           // Automatic LOD loads the index buffers directly to this object, so we are free to use the LOD values immediately
             mLodValues = *mesh->_getLodValueArray();
+        }
         else
-            mLodValues = MovableObject::c_DefaultLodMesh;
+        {
+           //////////////////////////////////////////////////
+           mLodValues       = *mesh->_getLodValueArray ();
+           mLodStrategyName = mesh->getLodStrategyName () ;
+
+           // For manual LODs, each LOD is a separate mesh object which must be explicitly loaded for v2 meshes.
+           // We must fetch the vertex and index buffers from each manual LOD mesh object, generate v2 VAOs from the buffers, and add them to our VAOs to provide each LOD.
+           for ( auto i = 1; i < mesh->getNumLodLevels (); ++i )
+           {
+              const auto& usage = mesh->getLodLevel ( i );
+
+              // The LOD mesh objects will probably use shared vertices, which cannot be directly imported to v2 buffers, so unshare first.
+              if ( usage.manualMesh->sharedVertexData[ VpNormal ] )
+              {
+                 v1::MeshManager::unshareVertices ( usage.manualMesh.get() );
+              }
+
+              auto* sub_mesh = usage.manualMesh->getSubMesh ( 0 ) ; // Assume we only care about one sub-mesh
+              auto* newVao = getSubMesh ( 0 )->createVAOFromV1 ( sub_mesh, halfPos, halfTexCoords, qTangents, 0 ) ; // Use our primary sub-mesh as the source object for creating the VAO
+
+              getSubMesh ( 0 )->mVao[ Ogre::VpNormal ].push_back ( newVao ) ;
+              getSubMesh ( 0 )->mVao[ Ogre::VpShadow ].push_back ( newVao ) ;
+           }
+           //////////////////////////////////////////////////
+        }
 
         mIsManual = true;
         setToLoaded();

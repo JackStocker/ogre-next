@@ -40,6 +40,9 @@ THE SOFTWARE.
 #include "OgreMeshManager2.h"
 #include "OgreMesh2.h"
 
+#include "OgreFileSystem.h"
+#include "OgreFileSystemLayer.h"
+
 #include "UpgradeOptions.h"
 
 #ifdef OGRE_STATIC_LIB
@@ -1231,6 +1234,26 @@ int main(int numargs, char** args)
         parseOpts(unOptList, binOptList);
 
         String source(args[startIdx]);
+
+        ///////////////////////////////////////////////////////////////////////////
+        auto dirnameOf = [] ( const std::string & fname )
+                             {
+                                size_t pos = fname.find_last_of ( "\\/" );
+                                return ( std::string::npos == pos )
+                                   ? ""
+                                   : fname.substr ( 0, pos );
+                             } ;
+
+        const auto dir = dirnameOf(source);
+
+        if ( ! dir.empty() )
+        {
+           cout << "Adding source file directory (" << dir << ") to resource groups" << endl;
+
+           ResourceGroupManager::getSingleton ().addResourceLocation ( dir, "FileSystem" ) ;
+           ResourceGroupManager::getSingleton ().initialiseAllResourceGroups(false);
+        }
+        ///////////////////////////////////////////////////////////////////////////
 
         // Load the mesh
         v1::MeshPtr v1Mesh;

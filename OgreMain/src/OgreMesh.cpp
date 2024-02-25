@@ -233,7 +233,10 @@ namespace v1 {
         // The loading process accesses LOD usages directly, so
         // transformation of user values must occur after loading is complete.
 
-        LodStrategy *lodStrategy = LodStrategyManager::getSingleton().getDefaultStrategy();
+        //////////////////////////////////////////////////////////////////
+        // Load the mesh's LOD strategy, not the default, so that we apply the correct base value and value transformations
+        LodStrategy *lodStrategy = LodStrategyManager::getSingleton().getStrategy ( mLodStrategyName );
+        //////////////////////////////////////////////////////////////////
 
         assert( mLodValues.size() == mMeshLodUsageList.size()  );
         LodValueArray::iterator lodValueIt = mLodValues.begin();

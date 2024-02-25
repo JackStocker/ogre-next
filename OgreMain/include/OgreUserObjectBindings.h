@@ -70,6 +70,10 @@ namespace Ogre {
         */
         const Any& getUserAny(void) const;
 
+        /////////////////////////////////////////
+        Any& getUserAny(void);
+        /////////////////////////////////////////
+
         /** Sets any kind of user object on this class instance.
         @remarks
         This method allows you to associate multiple object with this class. 

@@ -204,6 +204,10 @@ namespace Ogre {
             writeSkeletonLink(pMesh->getSkeletonName());
             LogManager::getSingleton().logMessage("Skeleton link exported.");
         }
+
+        LogManager::getSingleton().logMessage("Exporting LOD level thresholds....");
+        writeMeshLodLevel(pMesh);
+        LogManager::getSingleton().logMessage("LOD level thresholds exported.");
         
         // Write bounds information
         LogManager::getSingleton().logMessage("Exporting bounds information....");
@@ -272,14 +276,16 @@ namespace Ogre {
         writeData( &blendIndexToBoneIndexCount, 1, 1 );
         writeShorts( s->mBlendIndexToBoneIndexMap.begin(), blendIndexToBoneIndexCount );
 
-        uint8 numLodLevels = static_cast<uint8>( s->mVao[VpNormal].size() );
+        const uint8 numLodLevels = static_cast<uint8>( s->mVao[VpNormal].size() );
         writeData( &numLodLevels, 1, 1 );
 
-        uint8 numVaoPasses = s->mParent->hasIndependentShadowMappingVaos() + 1;
+        const uint8 numVaoPasses = s->mParent->hasIndependentShadowMappingVaos() + 1;
         for( uint i=0; i<numVaoPasses; ++i )
         {
             for( uint8 lodLevel=0; lodLevel<numLodLevels; ++lodLevel )
+            {
                 writeSubMeshLod( s->mVao[i][lodLevel], lodLevel, lodVertexTable[lodLevel] );
+            }
         }
     }
     //---------------------------------------------------------------------
@@ -552,10 +558,11 @@ namespace Ogre {
         // uint8 numLodLevels
         size += sizeof(uint8);
 
-        uint8 numVaoPasses = pSub->mParent->hasIndependentShadowMappingVaos() + 1;
+        const uint8 numLodLevels = static_cast<uint8>( pSub->mVao[VpNormal].size() );
+        const uint8 numVaoPasses = pSub->mParent->hasIndependentShadowMappingVaos() + 1;
         for( uint8 i=0; i<numVaoPasses; ++i )
         {
-            for( uint8 lodLevel=0; lodLevel<pSub->mVao[i].size(); ++lodLevel )
+            for( uint8 lodLevel=0; lodLevel<numLodLevels; ++lodLevel )
                 size += calcSubMeshLodSize( pSub->mVao[i][lodLevel], lodVertexTable[lodLevel] != lodLevel );
         }
 
@@ -585,7 +592,7 @@ namespace Ogre {
         else
         {
             //uint8 lodSource
-            size += sizeof(uint8);
+            size += MSTREAM_OVERHEAD_SIZE + sizeof(uint8);
         }
 
         return size;
@@ -715,7 +722,8 @@ namespace Ogre {
                 (streamID == M_SUBMESH ||
                  streamID == M_MESH_SKELETON_LINK ||
                  streamID == M_MESH_BOUNDS ||
-                 streamID == M_SUBMESH_NAME_TABLE /*||
+                 streamID == M_SUBMESH_NAME_TABLE ||
+                 streamID == M_MESH_LOD_LEVEL /*||
                  streamID == M_EDGE_LISTS ||
                  streamID == M_POSES ||
                  streamID == M_ANIMATIONS*/))
@@ -728,9 +736,9 @@ namespace Ogre {
                 case M_MESH_SKELETON_LINK:
                     readSkeletonLink(stream, pMesh, listener);
                     break;
-                /*case M_MESH_LOD_LEVEL:
+                case M_MESH_LOD_LEVEL:
                     readMeshLodLevel(stream, pMesh);
-                    break;*/
+                    break;
                 case M_MESH_BOUNDS:
                     readBoundsInfo(stream, pMesh);
                     break;
@@ -804,6 +812,10 @@ namespace Ogre {
                     assert( streamID == M_SUBMESH_LOD && !stream->eof() );
 
                     totalSubmeshLods.push_back( SubMeshLod() );
+                    //////////////////////////////////////////////////////////////////
+                    // We need to specify that the LOD 'mesh/VAO' is the lod index that we are adding, not the main submesh
+                    totalSubmeshLods.back ().lodSource = j;
+                    //////////////////////////////////////////////////////////////////
                     const uint8 currentLod = static_cast<uint8>( submeshLods.size() );
                     readSubMeshLod( stream, pMesh, &totalSubmeshLods.back(), currentLod );
 
@@ -1157,6 +1169,19 @@ namespace Ogre {
         if(listener)
             listener->processSkeletonName(pMesh, &skelName);
 
+        ////////////////////////////////////////
+        // If the mesh is specified in a path, then the skeleton needs to also be specified in a path.
+        // This means that we can have all model objects in sub-directories without having to create separate resource groups for each folder,
+        // and we can keep the models and skeletons in the same folders as each other.
+        const auto slash_pos = pMesh->getName ().find_last_of ( '/' ) ;
+
+        if ( ( slash_pos != Ogre::String::npos ) &&
+             ( skelName.find ( '/' ) == Ogre::String::npos ) )
+        {
+           skelName = pMesh->getName ().substr ( 0, slash_pos + 1 ) + skelName ;
+        }
+        ////////////////////////////////////////
+
         pMesh->setSkeletonName(skelName);
     }
     //---------------------------------------------------------------------
@@ -1174,6 +1199,40 @@ namespace Ogre {
 
         return size;
 
+    }
+    //---------------------------------------------------------------------
+    size_t MeshSerializerImpl::calcLodLevelSize( const Mesh *pMesh )
+    {
+        size_t size = MSTREAM_OVERHEAD_SIZE;                // Header
+        size += calcStringSize( pMesh->mLodStrategyName );  // string strategyName;
+        size += sizeof( unsigned short );                   // unsigned short mNumLods;
+        size += sizeof( float ) * pMesh->mLodValues.size();
+        return size;
+    }
+    //---------------------------------------------------------------------
+    void MeshSerializerImpl::writeMeshLodLevel(const Mesh* pMesh)
+    {
+        if( pMesh->mLodValues.size() <= 1u )
+            return;  // No LODs
+
+        writeChunkHeader( M_MESH_LOD_LEVEL, calcLodLevelSize( pMesh ) );
+
+        writeString( pMesh->mLodStrategyName );
+
+        const uint16 numLods = static_cast<uint16>( pMesh->mLodValues.size() );
+        writeShorts( &numLods, 1 );
+        writeFloats( pMesh->mLodValues.begin(), numLods );
+    }
+    //---------------------------------------------------------------------
+    void MeshSerializerImpl::readMeshLodLevel( DataStreamPtr &stream, Mesh *pMesh )
+    {
+        pMesh->mLodStrategyName = readString( stream );
+        uint16 numLods = 0u;
+        readShorts( stream, &numLods, 1 );
+
+        pMesh->mLodValues.clear();
+        pMesh->mLodValues.resize( numLods );
+        readFloats( stream, pMesh->mLodValues.begin(), numLods );
     }
     //---------------------------------------------------------------------
     void MeshSerializerImpl::writeBoundsInfo(const Mesh* pMesh)
@@ -2236,6 +2295,10 @@ namespace Ogre {
                     assert( streamID == M_SUBMESH_LOD && !stream->eof() );
 
                     totalSubmeshLods.push_back( SubMeshLod() );
+                    //////////////////////////////////////////////////////////////////
+                    // Same as previous
+                    totalSubmeshLods.back().lodSource = j;
+                    //////////////////////////////////////////////////////////////////
                     const uint8 currentLod = static_cast<uint8>( submeshLods.size() );
                     readSubMeshLod( stream, pMesh, &totalSubmeshLods.back(), currentLod );
 

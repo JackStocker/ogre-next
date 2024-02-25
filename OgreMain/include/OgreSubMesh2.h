@@ -236,6 +236,10 @@ namespace Ogre {
         void createPoses( const float** positionData, const float** normalData, size_t numPoses, size_t numVertices, 
                           const String* names = 0, bool halfPrecision = true );
 
+        /////////////////////////////////////////////////////
+        VertexArrayObject* createVAOFromV1 ( v1::SubMesh* subMesh, bool halfPos, bool halfTexCoords, bool qTangents, size_t vaoPassIdx ) ;
+        /////////////////////////////////////////////////////
+
     protected:
         void importBuffersFromV1( v1::SubMesh *subMesh, bool halfPos, bool halfTexCoords, bool qTangents,
                                   bool halfPose, size_t vaoPassIdx);
