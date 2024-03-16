@@ -43,7 +43,9 @@ namespace Ogre
                 owner->mCurrentMeshLod = std::max<int>( it - owner->mLodMesh->begin() - 1, 0 );
             }
 
-            RenderableArray::iterator itor = owner->mRenderables.begin();
+            /////////////////////////////////////////////
+            // Disabled to speed up LOD processing as we don't currently use and separate Material LODs
+            /*RenderableArray::iterator itor = owner->mRenderables.begin ();
             RenderableArray::iterator end  = owner->mRenderables.end();
 
             while( itor != end )
@@ -53,7 +55,8 @@ namespace Ogre
                                                                        lodValues[j] );
                 (*itor)->mCurrentMaterialLod = (uint8)std::max<int>( it - lodVec->begin() - 1, 0 );
                 ++itor;
-            }
+            }*/
+            /////////////////////////////////////////////
         }
     }
 }
