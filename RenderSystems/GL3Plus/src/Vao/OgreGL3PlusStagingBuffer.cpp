@@ -127,6 +127,17 @@ namespace Ogre
                 return;
             }
 
+            /////////////////////////////////////////////////////////////////
+            // For some reason, after a certain number of VAOs have been loaded, this function will wait forever on shutdown - likely an Ogre or Driver bug.
+            // glClientWaitSync returns 0, which isn't a valid value - so we just need to exit the loop and continue shutting down. Nothing we can do.
+            // 
+            // https://forums.ogre3d.org/viewtopic.php?p=535629
+            if ( waitRet == 0 )
+            {
+               return ;
+            }
+            /////////////////////////////////////////////////////////////////
+
             // After the first time, need to start flushing, and wait for a looong time.
             waitFlags = GL_SYNC_FLUSH_COMMANDS_BIT;
             waitDuration = kOneSecondInNanoSeconds;
