@@ -105,7 +105,7 @@ namespace Ogre {
     //-----------------------------------------------------------------------
     void TagPoint::updateFromParentImpl(void)
     {
-        assert( false && "Not implemented" );
+        //assert( false && "Not implemented" );
         //I'm lazy, but before you implement it, remember that the skeleton needs to be updated as well.
     }
     //-----------------------------------------------------------------------

@@ -89,6 +89,15 @@ static void APIENTRY GLDebugCallback(GLenum source,
     if( type == GL_DEBUG_TYPE_PUSH_GROUP || type == GL_DEBUG_TYPE_POP_GROUP )
         return; //Ignore these
 
+    /////////////////////////////////////////
+    if ( id == 131154 )
+    {
+       // Ignore this annoying message:
+       // OpenGL:performance(medium) 131154: Pixel-path performance warning: Pixel transfer is synchronized with 3D rendering.
+       return ;
+    }
+    /////////////////////////////////////////
+
     char debSource[32], debType[32], debSev[32];
 
     if (source == GL_DEBUG_SOURCE_API)

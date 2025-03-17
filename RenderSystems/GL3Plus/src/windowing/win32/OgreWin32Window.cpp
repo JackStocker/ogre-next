@@ -614,7 +614,12 @@ namespace Ogre {
 
                 }
                 // move window to 0,0 before display switch
-                SetWindowPos(mHWnd, HWND_TOPMOST, 0, 0, mWidth, mHeight, SWP_NOACTIVATE);
+                /////////////////////////////////////
+                //SetWindowPos(mHWnd, HWND_TOPMOST, 0, 0, mWidth, mHeight, SWP_NOACTIVATE);
+
+                // Changed to better allow switching between windows when alt-tabbing with the game Fullscreen
+                 SetWindowPos(mHWnd, HWND_NOTOPMOST, 0, 0, mWidth, mHeight, SWP_NOACTIVATE);
+                /////////////////////////////////////
 
                 if (ChangeDisplaySettingsEx(mDeviceName, &displayDeviceMode, NULL, CDS_FULLSCREEN, NULL) != DISP_CHANGE_SUCCESSFUL)             
                     LogManager::getSingleton().logMessage(LML_CRITICAL, "ChangeDisplaySettings failed");
@@ -633,8 +638,16 @@ namespace Ogre {
                 mLeft = monitorInfo.rcMonitor.left;
 
                 SetWindowLong(mHWnd, GWL_STYLE, getWindowStyle(mIsFullScreen));
-                SetWindowPos(mHWnd, HWND_TOPMOST, mLeft, mTop, width, height,
-                    SWP_NOACTIVATE);
+
+                /////////////////////////////////////
+                //SetWindowPos(mHWnd, HWND_TOPMOST, mLeft, mTop, width, height,
+                    //SWP_NOACTIVATE);
+
+                // Changed to better allow switching between windows when alt-tabbing with the game Fullscreen
+                SetWindowPos ( mHWnd, HWND_NOTOPMOST, mLeft, mTop, width, height,
+                   SWP_NOACTIVATE );
+                /////////////////////////////////////
+
                 mWidth = width;
                 mHeight = height;
 
@@ -962,7 +975,13 @@ namespace Ogre {
             if( state == false )
             {   //Restore Desktop
                 ChangeDisplaySettingsEx(mDeviceName, NULL, NULL, 0, NULL);
-                ShowWindow(mHWnd, SW_SHOWMINNOACTIVE);
+
+                ///////////////////////////////////////
+                //ShowWindow(mHWnd, SW_SHOWMINNOACTIVE);
+
+                // Changed to hide the window instead, so we allow alt-tabbing to other windows
+                ShowWindow ( mHWnd, SW_HIDE );
+                ///////////////////////////////////////
             }
             else
             {   //Restore App
