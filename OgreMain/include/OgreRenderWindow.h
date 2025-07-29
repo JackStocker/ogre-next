@@ -112,8 +112,10 @@ namespace Ogre
         @param width The new width to use
         @param height The new height to use
         */
-        virtual void setFullscreen(bool fullScreen, unsigned int widthPt, unsigned int heightPt)
+        ////////////////////////////////////////////////////////
+        virtual void setFullscreen(bool fullScreen, bool borderless, unsigned int widthPt, unsigned int heightPt)
                 { (void)fullScreen; (void)widthPt; (void)heightPt; }
+        ////////////////////////////////////////////////////////
         
         /** Destroys the window.
         */

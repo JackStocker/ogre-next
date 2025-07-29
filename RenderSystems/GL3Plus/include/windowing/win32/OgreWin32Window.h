@@ -41,7 +41,9 @@ namespace Ogre {
 
         void create(const String& name, unsigned int width, unsigned int height,
             bool fullScreen, const NameValuePairList *miscParams);
-        void setFullscreen(bool fullScreen, unsigned int width, unsigned int height);
+        ////////////////////////////////////////////////////////
+        void setFullscreen(bool fullScreen, bool borderless, unsigned int width, unsigned int height);
+        ////////////////////////////////////////////////////////
         void destroy(void);
         bool isActive(void) const;
         bool isVisible() const;
@@ -103,6 +105,10 @@ namespace Ogre {
         Win32Context *mContext;
         DWORD   mWindowedWinStyle;      // Windowed mode window style flags.
         DWORD   mFullscreenWinStyle;    // Fullscreen mode window style flags.
+
+        ///////////////////////////////////////////
+        bool mBorderless = false ;
+        ///////////////////////////////////////////
     };
 }
 

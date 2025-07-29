@@ -184,6 +184,28 @@ namespace Ogre {
         mOptions[optRTTMode.name] = optRTTMode;
         mOptions[optSRGB.name] = optSRGB;
 
+        ///////////////////////////////////////////////////
+        // Flags used to support Windowed fullscreen (borderless)
+        ConfigOption optBorder;
+        optBorder.name = "border";
+        optBorder.possibleValues.push_back ( "" ) ;
+        optBorder.possibleValues.push_back ( "none" ) ;
+        optBorder.possibleValues.push_back ( "fixed" ) ;
+        optBorder.currentValue = "" ;
+        optBorder.immutable = false ;
+
+        mOptions[ "border" ] = optBorder ;
+
+        ConfigOption optOuter;
+        optOuter.name = "outerDimensions";
+        optOuter.possibleValues.push_back ( "Yes" ) ;
+        optOuter.possibleValues.push_back ( "No" ) ;
+        optOuter.currentValue = "No" ;
+        optOuter.immutable = false ;
+
+        mOptions[ "outerDimensions" ] = optOuter ;
+        ///////////////////////////////////////////////////
+
         refreshConfig();
     }
 
@@ -335,6 +357,23 @@ namespace Ogre {
                 OGRE_EXCEPT(Exception::ERR_INVALIDPARAMS, "Can't find sRGB options!", "Win32GLSupport::createWindow");
             bool hwGamma = (opt->second.currentValue == "Yes");
             winOptions["gamma"] = StringConverter::toString(hwGamma);
+
+
+            ///////////////////////////////////////////////////
+            // Flags used to support Windowed fullscreen (borderless)
+            opt = mOptions.find("border");
+            if (opt != mOptions.end())
+            {
+               winOptions["border"] = opt->second.currentValue;
+            }
+
+            opt = mOptions.find ( "outerDimensions" );
+            if ( opt != mOptions.end () )
+            {
+               bool outerDimensions = ( opt->second.currentValue == "Yes" );
+               winOptions[ "outerDimensions" ] = StringConverter::toString ( outerDimensions);
+            }
+            ///////////////////////////////////////////////////
 
             return renderSystem->_createRenderWindow(windowTitle, w, h, fullscreen, &winOptions);
         }

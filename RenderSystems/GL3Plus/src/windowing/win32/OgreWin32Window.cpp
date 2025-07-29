@@ -299,8 +299,14 @@ namespace Ogre {
             }
             else
             {
+                //////////////////////////////////////
                 if (border == "none")
+                {
                     mWindowedWinStyle |= WS_POPUP;
+
+                    mBorderless = true;
+                }
+                //////////////////////////////////////
                 else if (border == "fixed")
                     mWindowedWinStyle |= WS_OVERLAPPED | WS_BORDER | WS_CAPTION |
                     WS_SYSMENU | WS_MINIMIZEBOX;
@@ -414,9 +420,27 @@ namespace Ogre {
                     LogManager::getSingleton().logMessage(LML_CRITICAL, "ChangeDisplaySettings failed");
             }
 
+            //////////////////////////////////////////////
+            auto winWidth  = mWidth ;
+            auto winHeight = mHeight ;
+            auto winLeft   = mLeft ;
+            auto winTop    = mTop ;
+
+            if ( mBorderless )
+            {
+               int screenw = monitorInfoEx.rcWork.right - monitorInfoEx.rcWork.left;
+               int screenh = monitorInfoEx.rcWork.bottom - monitorInfoEx.rcWork.top;
+
+               winWidth  = screenw ;
+               winHeight = screenh ;
+               winLeft   = 0 ;
+               winTop    = 0 ;
+            }
+            //////////////////////////////////////////////
+
             // Pass pointer to self as WM_CREATE parameter
             mHWnd = CreateWindowEx(dwStyleEx, "OgreGLWindow", title.c_str(),
-                getWindowStyle(fullScreen), mLeft, mTop, mWidth, mHeight, parent, 0, hInst, this);
+                getWindowStyle(fullScreen), winLeft, winTop, winWidth, winHeight, parent, 0, hInst, this);
 
             WindowEventUtilities::_addRenderWindow(this);
 
@@ -425,6 +449,19 @@ namespace Ogre {
                 << mName << "' : " << mWidth << "x" << mHeight
                 << ", " << mColourDepth << "bpp";
             
+            //////////////////////////////////////////////////////
+            // Windowed fullscreen (borderless) doesn't quite work as expected with OpenGL as having the window the same size as the monitor causes it to
+            // enter exclusive mode anyway, which is against the point.
+            // So when we want non-exclusive fullscreen, we have to use these calls below to set the size/details on the window to allow it to fit the
+            // monitor without enabling exclusive mode.
+            // https://github.com/libsdl-org/SDL/issues/12791
+            if ( mBorderless )
+            {
+               SetWindowLongPtr ( mHWnd, GWL_STYLE, WS_OVERLAPPED | WS_CLIPCHILDREN | WS_CLIPSIBLINGS ) ;
+               SetWindowLongPtr ( mHWnd, GWL_EXSTYLE, WS_EX_APPWINDOW ) ;
+               SetWindowPos ( mHWnd, HWND_TOP, winLeft, winTop, winWidth, winHeight, SWP_FRAMECHANGED | SWP_NOOWNERZORDER | SWP_SHOWWINDOW ) ;
+            }
+            //////////////////////////////////////////////////////
         }
 
         HDC old_hdc = wglGetCurrentDC();
@@ -567,11 +604,26 @@ namespace Ogre {
 
     }
 
-    void Win32Window::setFullscreen(bool fullScreen, unsigned int width, unsigned int height)
+    void Win32Window::setFullscreen(bool fullScreen, bool borderless, unsigned int width, unsigned int height)
     {
-        if (mIsFullScreen != fullScreen || width != mWidth || height != mHeight)
+        if (mIsFullScreen != fullScreen || mBorderless != borderless || width != mWidth || height != mHeight)
         {
             mIsFullScreen = fullScreen;
+
+            ///////////////////////////////////////////////
+            mBorderless = borderless ;
+
+            if ( mBorderless )
+            {
+               mWindowedWinStyle &= ~WS_OVERLAPPEDWINDOW ;
+               mWindowedWinStyle |= WS_POPUP ;
+            }
+            else
+            {
+               mWindowedWinStyle &= ~WS_POPUP ;
+               mWindowedWinStyle |= WS_OVERLAPPEDWINDOW ;
+            }
+            ///////////////////////////////////////////////
             
             if (mIsFullScreen)
             {
@@ -673,11 +725,22 @@ namespace Ogre {
                 LONG screenw = monitorInfo.rcWork.right  - monitorInfo.rcWork.left;
                 LONG screenh = monitorInfo.rcWork.bottom - monitorInfo.rcWork.top;
 
-
                 int left = (screenw > (int)winWidth) ? ((screenw - (int)winWidth) / 2) : 0;
                 int top = (screenh > (int)winHeight) ? ((screenh - (int)winHeight) / 2) : 0;
 
-                SetWindowLong(mHWnd, GWL_STYLE, getWindowStyle(mIsFullScreen));
+                //////////////////////////////////////////////
+                if ( mBorderless )
+                {
+                   winWidth  = screenw ;
+                   winHeight = screenh ;
+                   left      = 0 ;
+                   top       = 0 ;
+                }
+                //////////////////////////////////////////////
+
+                const auto window_style = getWindowStyle ( mIsFullScreen ) ;
+
+                SetWindowLong(mHWnd, GWL_STYLE, window_style );
                 SetWindowPos(mHWnd, HWND_NOTOPMOST, left, top, winWidth, winHeight,
                     SWP_DRAWFRAME | SWP_FRAMECHANGED | SWP_NOACTIVATE);
                 mWidth = width;
@@ -685,6 +748,19 @@ namespace Ogre {
 
                 windowMovedOrResized();
 
+                //////////////////////////////////////////////////////
+                // Windowed fullscreen (borderless) doesn't quite work as expected with OpenGL as having the window the same size as the monitor causes it to
+                // enter exclusive mode anyway, which is against the point.
+                // So when we want non-exclusive fullscreen, we have to use these calls below to set the size/details on the window to allow it to fit the
+                // monitor without enabling exclusive mode.
+                // https://github.com/libsdl-org/SDL/issues/12791
+                if ( mBorderless )
+                {
+                   SetWindowLongPtr ( mHWnd, GWL_STYLE, WS_OVERLAPPED | WS_CLIPCHILDREN | WS_CLIPSIBLINGS ) ;
+                   SetWindowLongPtr ( mHWnd, GWL_EXSTYLE, WS_EX_APPWINDOW ) ;
+                   SetWindowPos ( mHWnd, HWND_TOP, left, top, winWidth, winHeight, SWP_FRAMECHANGED | SWP_NOOWNERZORDER | SWP_SHOWWINDOW ) ;
+                }
+                //////////////////////////////////////////////////////
             }
 
         }
