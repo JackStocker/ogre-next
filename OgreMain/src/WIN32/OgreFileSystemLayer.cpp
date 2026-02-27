@@ -131,8 +131,73 @@ namespace Ogre
         // fill mHomePath
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
         WCHAR wpath[MAX_PATH];
-        if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PERSONAL|CSIDL_FLAG_CREATE, NULL, 0, wpath)))
-            widePathToOgreString(mHomePath, wpath);
+
+        /////////////////////////////////////////////////////////////
+
+        // If Controlled Folder Access is enabled, the Documents folder is blocked by default.
+        // To avoid the player having to explicitly allow the access, fall-back to APP_DATA instead.
+        //
+        // But we want to make sure that we continue to use the APP_DATA even if they then give access,
+        // otherwise settings/saves would be read from the wrong folder.
+        //
+        // So first see if there is already the APP_DATA sub folder we are looking for.
+        //
+        // Don't pass the CSIDL_FLAG_CREATE, so we don't show the access warning.
+        if ( SUCCEEDED ( SHGetFolderPathW ( NULL, CSIDL_APPDATA, NULL, 0, wpath ) ) )
+        {
+           widePathToOgreString ( mHomePath, wpath );
+        }
+
+        const DWORD dwAttrib = GetFileAttributes ( ( mHomePath + '\\' + subdir + '\\' ).c_str () ) ;
+
+        const bool app_data_folder_exists = ( ( dwAttrib != INVALID_FILE_ATTRIBUTES ) &&
+                                              ( dwAttrib & FILE_ATTRIBUTE_DIRECTORY ) ) ;
+
+        if ( ! app_data_folder_exists )
+        {
+           const auto is_controlled_folder_access_enabled = [] ()
+                                                              {
+                                                                  const wchar_t* subKey    = L"SOFTWARE\\Microsoft\\Windows Defender\\Windows Defender Exploit Guard\\Controlled Folder Access";
+                                                                  const wchar_t* valueName = L"EnableControlledFolderAccess";
+
+                                                                  DWORD value = 0 ;
+                                                                  DWORD size  = sizeof ( value ) ;
+
+                                                                  LSTATUS result = RegGetValueW ( HKEY_LOCAL_MACHINE,
+                                                                                                  subKey,
+                                                                                                  valueName,
+                                                                                                  RRF_RT_REG_DWORD,
+                                                                                                  nullptr,
+                                                                                                  &value,
+                                                                                                  &size ) ;
+
+                                                                  if ( result == ERROR_SUCCESS )
+                                                                  {
+                                                                     return value == 1 ;
+                                                                  }
+
+                                                                  return false ;
+                                                              } ;
+
+           // The folder doesn't exist, so we can try to access the default Documents folder first,
+           // and fallback to the APP_DATA folder otherwise.
+           //
+           // Do a basic check to see if we shouldn't even bother with the Document folder if 'Controlled Folder Access' is enabled
+           bool can_use_documents = ! is_controlled_folder_access_enabled () ;
+
+           // This call will cause the 'Controlled Folder Access' warning if it is enabled.
+           if ( can_use_documents &&
+                SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_PERSONAL|CSIDL_FLAG_CREATE, NULL, 0, wpath)))
+           {
+               widePathToOgreString(mHomePath, wpath);
+           }
+           else
+           {
+              // Fallback to APP_DATA. We will then use this as the base folder from now-on.
+           }
+        }
+        /////////////////////////////////////////////////////////////
+
 #elif OGRE_PLATFORM == OGRE_PLATFORM_WINRT
         widePathToOgreString(mHomePath, Windows::Storage::ApplicationData::Current->LocalFolder->Path->Data());
 #endif
