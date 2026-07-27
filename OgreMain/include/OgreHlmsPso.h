@@ -139,6 +139,11 @@ namespace Ogre
         {
             ForceDisableDepthWrites     = 1u << 0u,
             InvertVertexWinding         = 1u << 1u,
+
+            ////////////////////////////////////////////////////
+            DepthFuncMask = 15u << 4u, // reserve 4 bits.
+            DepthFunc_GREATER = 8u << 4u,
+            ////////////////////////////////////////////////////
         };
     };
 

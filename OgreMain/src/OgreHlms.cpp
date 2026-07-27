@@ -2028,6 +2028,12 @@ namespace Ogre
                             CULL_ANTICLOCKWISE : CULL_CLOCKWISE;
             }
 
+            ////////////////////////////////////////////////////////////
+            const uint32 depthFunc = ( pso.pass.strongMacroblockBits & HlmsPassPso::DepthFuncMask );
+            if ( depthFunc > 0 )
+               prepassMacroblock.mDepthFunc = static_cast< CompareFunction >( ( depthFunc >> 8u ) - 1 );
+            ////////////////////////////////////////////////////////////
+
             pso.macroblock = mHlmsManager->getMacroblock( prepassMacroblock );
         }
     }

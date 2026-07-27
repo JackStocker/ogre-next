@@ -337,12 +337,14 @@ namespace Ogre
 
         void dumpProperties( std::ofstream &outFile );
 
+        //////////////////////////////////////////////////////////////////////
         /** Modifies the PSO's macroblock if there are reasons to do that, and creates
             a strong reference to the macroblock that the PSO will own.
         @param pso [in/out]
             PSO to (potentially) modify.
         */
-        void applyStrongMacroblockRules( HlmsPso &pso );
+        virtual void applyStrongMacroblockRules( HlmsPso &pso );
+        //////////////////////////////////////////////////////////////////////
 
         HighLevelGpuProgramPtr compileShaderCode( const String &source,
                                                   const String &debugFilenameOutput,
