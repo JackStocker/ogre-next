@@ -3853,6 +3853,14 @@ namespace Ogre {
             }
             else
             {
+                ////////////////////////////////////
+                static bool warning_logged = false ;
+                if ( ! warning_logged )
+                {
+                  LogManager::getSingleton ().logMessage ( "GL3+: Using more texture units [" + StringConverter::toString ( unit + 1 ) + "] than are available [" + StringConverter::toString ( getCapabilities ()->getNumTextureUnits () ) + "]" );
+                  warning_logged = true ;
+                }
+                ////////////////////////////////////
                 return false;
             }
         }
